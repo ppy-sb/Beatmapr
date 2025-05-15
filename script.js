@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         container.style.backgroundImage = `url('${coverUrl}')`;
       };
       img.onerror = () => {
-        container.style.backgroundImage = "url('default_cover.jpg')";
+        container.style.backgroundImage = "url('images/default_cover.jpg')";
       };
       img.src = coverUrl;
 

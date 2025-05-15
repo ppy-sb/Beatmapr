@@ -6,8 +6,8 @@ import os
 import re
 
 # Your client credentials
-CLIENT_ID = 31586
-API_KEY = "Sty09gmsufGNjadWZyhNftashebxHV7lML7YFJJy"
+CLIENT_ID = 0
+API_KEY = ""
 
 client = ossapi.Ossapi(client_id=CLIENT_ID, client_secret=API_KEY)
 
