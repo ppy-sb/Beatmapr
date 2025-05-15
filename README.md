@@ -1,7 +1,5 @@
-#Beatmapr
-
 **Beatmapr** is a web-based tool that fetches a user's relax scores from the Akatsuki API and matches them against official bancho beatmap packs.  
-It visualizes your progress toward full pack completion with a sleek, interactive UI.
+It visualizes your progress toward full pack completion.
 
 ---
 
@@ -33,11 +31,11 @@ It visualizes your progress toward full pack completion with a sleek, interactiv
 ---
 
 ### Data Files
-| File                  | Description                                                            |
-|-----------------------|------------------------------------------------------------------------|
-| `packs.json`          | Beatmapset list with `beatmap_id`, `title`, `difficulty`, `duration`   |
-| `users.json`          | Local cache of Akatsuki user data                                       |
-| `{user_id}_scores.txt`| Score file used to check pack progress                                 |
+| File                  | Description                                                                                  |
+|-----------------------|--------------------------------------------------------------------------------------------- |
+| `packs.json`          | Bancho beatmap packs data `beatmapset_id`, `beatmap_id`, `title`, `difficulty`, `duration`   |
+| `users.json`          | Local cache of Akatsuki user data                                                            |
+| `{user_id}_scores.txt`| Score file used to check pack progress                                                       |
 
 ---
 
@@ -50,8 +48,3 @@ It visualizes your progress toward full pack completion with a sleek, interactiv
 
 ---
 
-## How to Run
-
-### Install dependencies:
-```bash
-npm install
