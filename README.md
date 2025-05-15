@@ -3,7 +3,7 @@
 
 Summary : a website that allows you retrieve users relax best scores from akatsuki API and then matches them against bancho ranked beatmap packs to visualise your progress.
 
-File documentation:
+# File documentation:
 
 index.html - main entry point for the frontend of the website
 styles.css - defines the visual look
@@ -20,5 +20,5 @@ users.json - same format as akatsuki api but stored in a file.
 
 {user_id}_scores.txt - this file gets compared with packs.json to give you the results.
 
-others:
+# others:
 package-lock.json, package.json, node_module - these are node.js related files.
