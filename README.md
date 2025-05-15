@@ -5,7 +5,7 @@ It visualizes your progress toward full pack completion.
 
 ## Project Structure
 
-### 🌐 Static Frontend
+### Static Frontend
 | File         | Description                                           |
 |--------------|-------------------------------------------------------|
 | `index.html` | Entry point for the frontend                         |
