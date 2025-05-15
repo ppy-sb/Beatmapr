@@ -1,38 +1,46 @@
-# Beatmapr
-*to be organised*
+Beatmapr is a web-based tool that fetches a user's relax scores from the Akatsuki API and matches them against official bancho beatmap packs. It visualizes your progress toward full pack completion with a sleek, interactive UI.
 
-Summary : a website that allows you retrieve users relax best scores from akatsuki API and then matches them against bancho ranked beatmap packs to visualise your progress.
+Project Structure
+🔹 Static Frontend
+File	Description
+index.html	Main entry point for the frontend UI
+styles.css	Defines the look and feel of the interface
+script.js	Handles frontend logic and user interaction
 
-# File documentation:
+🔹 Backend
+File	Description
+server.js	Entry point for the Node.js backend. Serves static files, APIs, and runs Python scripts
 
-static frontend
+🔹 Python Scripts
+File	Description
+get_packs.py	Retrieves beatmap packs from bancho and writes them to packs.json
+get_users.py	Retrieves Akatsuki user data and writes them to users.json
+fetch_ranked_scores.py	Fetches relax best scores and saves them to {user_id}_scores.txt
 
-• index.html - main entry point for the frontend of the website
+🔹 Data Files
+File	Description
+packs.json	Contains beatmapset_id, beatmap_id, title, difficulty, time_duration
+users.json	Local copy of Akatsuki API user data
+{user_id}_scores.txt	Generated score file used to match against beatmap packs
 
-• styles.css - defines the visual look
+🔹 Node Environment
+File/Folder	Description
+package.json	Project metadata and dependencies
+package-lock.json	Exact version tree of installed packages
+node_modules/	Installed npm modules
 
-• script.js - frontend logic of the website
+How to Run
+Install dependencies:
 
-backend
+bash
+Copy
+Edit
+npm install
+Start the server:
 
-• server.js - backend entry point of the website
-
-python scripts
-
-• get_packs.py - a script that retrieves packs from bancho and writes them to packs.json
-
-• get_users.py - a script that retrieves user data from akatsuki api and writes them to users.json
-
-• fetch_ranked_scores.py - a script that retrieves users relax best scores and writes them to a {user_id}_scores.txt file
-
-data
-
-• packs.json - contains beatmapset_id, beatmap_id, title, difficulty, time_duration
-
-• users.json - same format as akatsuki api but stored in a file.
-
-• {user_id}_scores.txt - this file gets compared with packs.json to give you the results.
-
-# others:
-
-• package-lock.json, package.json, node_module - these are node.js related files.
+bash
+Copy
+Edit
+node src/server/server.js
+Visit your app at:
+http://localhost:3000
