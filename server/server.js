@@ -49,6 +49,9 @@ app.get('/api/fetch-scores', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+
+// Disable timeout (or set it longer)
+server.setTimeout(300000); // 5 minutes
