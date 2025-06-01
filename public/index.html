@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beatmap Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter&family=Nunito&display=swap" rel="stylesheet">
+
+
+  <!-- Favicon -->
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+
+</head>
+<body>
+
+  <div class="page-wrapper">
+    <script src="script.js" defer></script>
+
+    <!--Navigation Banner-->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">Beatmap Checker</div>
+
+    <form class="search-form" action="/search" method="GET">
+      <div class="input-wrapper">
+        <input type="text" name="player" placeholder="Search player..." autocomplete="off" />
+        <ul id="user-suggestions" class="suggestions-list"></ul>
+      </div>
+      <button type="submit">Search</button>
+    </form>
+
+        <div class="auth-buttons">
+          <a href="/login" class="btn">Login</a>
+          <a href="/register" class="btn">Register</a>
+        </div>
+      </div>
+    </nav>
+
+    <div id="status" style="text-align:center; margin: 1rem 0; font-weight: bold;"></div>
+    
+    <!--Profile Banner-->
+    <div class="profile-section">
+      <div class="profile-container">
+        <img src="images/default.png" alt="Player Avatar" class="profile-avatar" />
+        <div class="profile-info">
+          <h2>Player</h2>
+          <p>Ranked Score: 0</p>
+          <p>Global Rank: #0</p>
+          <div class="rank-counts">
+            <img src="images/SS.svg" alt="SS"> <span id="ss-count">0</span>
+            <img src="images/SSH.svg" alt="SSH"> <span id="ssh-count">0</span>
+            <img src="images/SH.svg" alt="SH"> <span id="sh-count">0</span>
+            <img src="images/S.svg" alt="S"> <span id="s-count">0</span>
+            <img src="images/A.svg" alt="A"> <span id="a-count">0</span>
+            <img src="images/B.svg" alt="B"> <span id="b-count">0</span>
+            <img src="images/C.svg" alt="C"> <span id="c-count">0</span>
+            <img src="images/D.svg" alt="D"> <span id="d-count">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--Progress Banner-->
+    <div class="progress-section">
+    </div>
+
+    <!--Buttons Banner-->
+    <div class="dev-section">
+      <input type="file" id="import-file" accept=".txt" style="display: none;">
+      <button id="import-button">Import Scores</button>
+      <button id="export-button">Export Scores</button>
+    </div>
+
+    <!--Beatmap Packs Banner-->
+    <div class="beatmap-container">
+      <div class="beatmaps">
+        <div class="squares"></div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1></h1>
+      <p></p>
+    </div>
+
+    <!--popup-->
+    <div id="beatmap-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2></h2>
+        <div id="beatmap-list"></div>
+      </div>
+    </div>
+
+    <div id="custom-tooltip" class="custom-tooltip hidden"></div>
+  </div>
+
+
+  
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>Made by Syneergy | Inspired by osu! inspector | Support me on . . .  </p>
+
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,6 +1,15 @@
 {
+  "name": "beatmap-checker",
+  "version": "1.0.0",
+  "description": "Website to check osu! beatmap progress using Akatsuki data.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
   "dependencies": {
     "express": "^5.1.0",
     "node-fetch": "^2.7.0"
-  }
+  },
+  "license": "MIT",
+  "author": "Syneergy, Dezzy"
 }
