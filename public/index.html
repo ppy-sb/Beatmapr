@@ -32,8 +32,8 @@
     </form>
 
         <div class="auth-buttons">
-          <a href="/login" class="btn">Login</a>
-          <a href="/register" class="btn">Register</a>
+          <!--<a href="/login" class="btn">Login</a>-->
+          <!--<a href="/register" class="btn">Register</a>-->
         </div>
       </div>
     </nav>
@@ -62,10 +62,6 @@
       </div>
     </div>
 
-    <!--Progress Banner-->
-    <div class="progress-section">
-    </div>
-
     <!--Buttons Banner-->
     <div class="dev-section">
       <input type="file" id="import-file" accept=".txt" style="display: none;">
@@ -75,14 +71,23 @@
 
     <!--Beatmap Packs Banner-->
     <div class="beatmap-container">
+      <div class="packs-header" style="text-align: left; margin: 1rem 0 0.5rem 1rem; color: #fff;">
+        <h3 style="margin: 0;">Standard Packs - Completed: <span id="completed-pack-count">0</span> / <span id="total-pack-count">0</span> <span class="progress-section"></span> </h3>
+            <!--Progress Banner-->
+      </div>
       <div class="beatmaps">
         <div class="squares"></div>
       </div>
     </div>
 
-    <div class="container">
-      <h1></h1>
-      <p></p>
+        <!--Beatmap Packs Banner-->
+    <div class="beatmap-container">
+      <div class="packs-header" style="text-align: left; margin: 1rem 0 0.5rem 1rem; color: #fff;">
+        <h3 style="margin: 0;">Other Packs</h3>
+      </div>
+      <div class="beatmaps">
+        <div class="squares"></div>
+      </div>
     </div>
 
     <!--popup-->
@@ -95,19 +100,20 @@
     </div>
 
     <div id="custom-tooltip" class="custom-tooltip hidden"></div>
+
+    <footer class="site-footer">
+      <div class="footer-content">
+        <p class="footer-note">
+          Made by <a href="https://akatsuki.gg/u/16625?mode=0&rx=1" target="_blank" rel="noopener noreferrer">Syneergy</a> |
+          Inspired by <a href="https://score.kirino.sh/" target="_blank" rel="noopener noreferrer">osu! inspector</a> |
+          <a href="https://www.paypal.com/paypalme/leolukacs?country.x=GB&locale.x=en_GB" target="_blank" rel="noopener noreferrer">Support me</a> 
+        </p>
+      </div>
+    </footer>
   </div>
 
 
-  
-<footer class="site-footer">
-  <div class="footer-content">
-    <p class="footer-note">
-      Made by <a href="https://akatsuki.gg/u/16625?mode=0&rx=1" target="_blank" rel="noopener noreferrer">Syneergy</a> |
-      Inspired by <a href="https://score.kirino.sh/" target="_blank" rel="noopener noreferrer">osu! inspector</a> |
-      <a href="https://www.paypal.com/paypalme/leolukacs?country.x=GB&locale.x=en_GB" target="_blank" rel="noopener noreferrer">Support me</a> 
-    </p>
-  </div>
-</footer>
+
 
 </body>
 </html>

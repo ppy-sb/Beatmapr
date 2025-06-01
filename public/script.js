@@ -54,6 +54,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     return aNum - bNum;
   });
 
+  document.getElementById("total-pack-count").textContent = sortedPacks.length;
+
+  function updateCompletedPackCount() {
+    const completedCount = sortedPacks.filter(pack =>
+      pack.beatmaps.every(b => beatmapIds.has(b.beatmap_id))
+    ).length;
+
+    document.getElementById("completed-pack-count").textContent = completedCount;
+  }
+
   const progressText = document.createElement("div");
   progressText.className = "progress-overview";
   document.querySelector(".progress-section").appendChild(progressText);
@@ -166,6 +176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateCompletionText();
         updateSquareTooltip(squareElement, packName, fullBeatmapData);
         label.style.color = checkbox.checked ? "#4CAF50" : "#F44336";
+        updateCompletedPackCount(); // ← Add this
       });
 
       overlay.appendChild(checkbox);
@@ -354,6 +365,7 @@ ${matched} / ${total}`;
 
       updateAllSquares();
       updateCompletionText();
+      updateCompletedPackCount();
 
       // Extract user ID from filename
       const idFromFilename = file.name.match(/^(\d+)_((scores|export))\.txt$/)?.[1];
@@ -449,6 +461,7 @@ ${matched} / ${total}`;
 
       updateAllSquares();
       updateCompletionText();
+      updateCompletedPackCount();
 
       const rankLine = lines.find(line =>
         line.includes("SSH:") && line.includes("SH:") && line.includes("SS:")
