@@ -417,6 +417,21 @@ html, body {
   border-radius: 10px 10px 10px 10px;
 }
 
+.site-footer .footer-note {
+  color: #ccc;
+  margin: 10px 0;
+}
+
+.site-footer .footer-note a {
+  color: #03A9F4;
+  text-decoration: none;
+  transition: text-decoration 0.2s ease;
+}
+
+.site-footer .footer-note a:hover {
+  text-decoration: underline;
+}
+
 .rank-counts img {
   height: 20px;
   vertical-align: middle;
