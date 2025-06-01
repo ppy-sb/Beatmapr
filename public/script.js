@@ -291,7 +291,7 @@ ${matched} / ${total}`;
     avatarImage.onerror = () => avatarImage.src = "default.png";
 
     try {
-      const profileRes = await fetch(`https://akatsuki.gg/api/v1/users/full?id=${userId}`);
+      const profileRes = await fetch(`/api/user?id=${userId}`);
       const profileData = await profileRes.json();
 
       if (profileData?.username) {
