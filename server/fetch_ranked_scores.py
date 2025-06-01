@@ -6,105 +6,54 @@ import ujson
 import sys
 import os
 
-# Retry logic with exponential backoff
-def retry_with_backoff(func, max_retries=3):
-    def wrapper(*args, **kwargs):
-        retries = 0
-        backoff = 1
-        while retries < max_retries:
-            try:
-                return func(*args, **kwargs)
-            except requests.RequestException as e:
-                retries += 1
-                print(f"Error occurred: {e}. Retrying in {backoff} seconds...")
-                time.sleep(backoff)
-                backoff *= 2
-        raise Exception(f"Failed after {max_retries} retries.")
-    return wrapper
-
-@retry_with_backoff
-def fetch_page(user_id, page):
-    url = f"https://akatsuki.gg/api/v1/users/scores/best?mode=0&p={page}&l=100&rx=1&id={user_id}"
-    response = requests.get(url, timeout=5)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        response.raise_for_status()
-
-async def fetch_page_async(session, user_id, page, page_counter):
+async def fetch_page_async(session, user_id, page):
     url = f"https://akatsuki.gg/api/v1/users/scores/best?mode=0&p={page}&l=100&rx=1&id={user_id}"
     headers = {"Accept-Encoding": "gzip"}
-    async with session.get(url, headers=headers) as response:
-        if response.status == 200:
-            page_counter[0] += 1
-            print(f"Fetched page: {page}")
-            return await response.text()
-        else:
-            print(f"Error: {response.status}")
-            return None
+    try:
+        async with session.get(url, headers=headers, timeout=10) as response:
+            if response.status == 200:
+                print(f"✅ Page {page}")
+                return await response.text()
+            else:
+                print(f"Page {page} failed with status {response.status}")
+                return None
+    except Exception as e:
+        print(f"Exception on page {page}: {e}")
+        return None
 
-async def fetch_all_pages_async(user_id, start_page, page_counter):
-    all_scores = []
-    page = start_page
-
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=5)) as session:
-        while True:
-            url = f"https://akatsuki.gg/api/v1/users/scores/best?mode=0&p={page}&l=100&rx=1&id={user_id}"
-            try:
-                async with session.get(url, timeout=10) as response:
-                    if response.status != 200:
-                        print(f"Page {page} failed with status {response.status}")
-                        break
-
-                    data = await response.json()
-                    scores = data.get("scores")
-
-                    if not scores:
-                        print(f"Page {page} returned no scores (scores={scores})")
-                        break
-
-                    all_scores.extend(scores)
-                    page_counter[0] += 1
-                    print(f"Page {page}: {len(scores)} scores (total: {len(all_scores)})")
-
-                    if len(scores) < 100:
-                        break
-
-            except Exception as e:
-                print(f"Exception on page {page}: {e}")
-                break
-
-            page += 1
-
-    return all_scores
-
-
-
-def fetch_scores(user_id):
+async def fetch_all_pages(user_id):
     all_scores = []
     page = 1
-    pages_fetched = [0]
-    start_time = time.time()
+    batch_size = 3
+    pages_fetched = 0
 
-    first_page_data = fetch_page(user_id, page)
-    scores = first_page_data.get("scores", [])
-    all_scores.extend(scores)
-    pages_fetched[0] += 1
-    print(f"Fetched page: {page}")
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=10)) as session:
+        while True:
+            tasks = [fetch_page_async(session, user_id, page + i) for i in range(batch_size)]
+            responses = await asyncio.gather(*tasks)
 
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_closed():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+            got_more = False
 
-    additional_scores = loop.run_until_complete(fetch_all_pages_async(user_id, page + 1, pages_fetched))
-    all_scores.extend(additional_scores)
-    print(f"Total time: {time.time() - start_time:.2f}s")
-    return all_scores, pages_fetched[0]
+            for i, response in enumerate(responses):
+                current_page = page + i
+                if response:
+                    try:
+                        data = ujson.loads(response)
+                        scores = data.get("scores", [])
+                        if scores:
+                            all_scores.extend(scores)
+                            pages_fetched += 1
+                            print(f"Page {current_page}: {len(scores)} scores (total: {len(all_scores)})")
+                            if len(scores) == 100:
+                                got_more = True
+                    except Exception as e:
+                        print(f"Failed to parse page {current_page}: {e}")
+
+            page += batch_size
+            if not got_more:
+                break
+
+    return all_scores, pages_fetched
 
 def write_scores_to_file(scores, filename):
     rank_counts = {r: 0 for r in ["SSH", "SH", "SS", "S", "A", "B", "C", "D"]}
@@ -137,24 +86,31 @@ def read_beatmap_ids_from_file(filename):
                 beatmap_ids.append(int(line))
     return beatmap_ids
 
-# ===========================
-# 🧠 Script Entry Point
-# ===========================
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python fetch_ranked_scores.py <user_id>")
         sys.exit(1)
 
     user_id = int(sys.argv[1])
-    scores, total_pages_fetched = fetch_scores(user_id)
+    start = time.time()
 
-    # Save to /data/{user_id}_scores.txt
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    scores, page_count = loop.run_until_complete(fetch_all_pages(user_id))
+
     output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
     os.makedirs(output_dir, exist_ok=True)
     output_filename = os.path.join(output_dir, f"{user_id}_scores.txt")
 
     write_scores_to_file(scores, output_filename)
+    print(f"[OK] Written to {output_filename}. Pages: {page_count}. Total time: {time.time() - start:.2f}s")
 
-    print(f"[OK] Scores written to {output_filename}. Pages fetched: {total_pages_fetched}.")
     beatmap_ids = read_beatmap_ids_from_file(output_filename)
-    print(f"{len(beatmap_ids)} beatmap IDs loaded from file.")
+    print(f"Loaded {len(beatmap_ids)} beatmap IDs")
