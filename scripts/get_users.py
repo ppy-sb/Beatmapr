@@ -8,7 +8,7 @@ BASE_URL = "https://akatsuki.gg/api/v1/users"
 LIMIT = 100
 BATCH_SIZE = 10
 MAX_RETRIES = 3
-OUTPUT_FILE = "users.json"
+OUTPUT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "users.json"))
 
 def load_existing_users():
     if os.path.exists(OUTPUT_FILE):
@@ -20,6 +20,7 @@ def load_existing_users():
     return []
 
 def save_users(users):
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     users.sort(key=lambda x: datetime.strptime(x["registered_on"], "%Y-%m-%dT%H:%M:%SZ"))
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(users, f, indent=4, ensure_ascii=False)

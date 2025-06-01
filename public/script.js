@@ -272,7 +272,18 @@ ${matched} / ${total}`;
 
   searchForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const userId = input.value.trim();
+    let inputValue = input.value.trim();
+    let matchedUser = usersList.find(u =>
+      u.id.toString() === inputValue || u.username.toLowerCase() === inputValue.toLowerCase()
+    );
+
+    if (!matchedUser) {
+      statusDisplay.textContent = "User not found.";
+      return;
+    }
+
+    const userId = matchedUser.id.toString();
+    currentUserId = userId;
     if (!userId) return;
 
     currentUserId = userId;
@@ -311,7 +322,7 @@ ${matched} / ${total}`;
       statusDisplay.textContent = "Waiting for ranked scores file...";
 
       setTimeout(() => {
-        autoLoadBeatmapFile(`${userId}_scores.txt`);
+        autoLoadBeatmapFile(`data/${userId}_scores.txt`);
       }, 1500);
     } catch (err) {
       console.error("Failed to start score fetch:", err);
@@ -468,7 +479,7 @@ ${matched} / ${total}`;
 
   setInterval(() => {
     if (currentUserId) {
-      autoLoadBeatmapFile(`${currentUserId}_scores.txt`);
+      autoLoadBeatmapFile(`data/${currentUserId}_scores.txt`);
     }
   }, 1000000);
 

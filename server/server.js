@@ -7,7 +7,11 @@ const app = express();
 const PORT = 3000;
 
 // Serve static files from the current directory
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Server data files
+app.use('/data', express.static(path.join(__dirname, '..', 'data')));
+
 
 // Endpoint to fetch Akatsuki user profile data
 app.get('/api/user', async (req, res) => {
@@ -29,7 +33,8 @@ app.get('/api/fetch-scores', (req, res) => {
   const userId = req.query.id;
   if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-  const pythonCommand = `python fetch_ranked_scores.py ${userId}`;
+  const scriptPath = path.resolve(__dirname, 'fetch_ranked_scores.py');
+  const pythonCommand = `python "${scriptPath}" ${userId}`;
   console.log(`Running: ${pythonCommand}`);
 
   exec(pythonCommand, (error, stdout, stderr) => {
@@ -38,7 +43,7 @@ app.get('/api/fetch-scores', (req, res) => {
       return res.status(500).json({ error: 'Failed to fetch ranked scores' });
     }
 
-    const filePath = path.join(__dirname, `${userId}_scores.txt`);
+    const filePath = path.join(__dirname, '..', 'data', `${userId}_scores.txt`);
     res.sendFile(filePath);
   });
 });
