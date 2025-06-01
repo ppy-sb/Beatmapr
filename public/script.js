@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     matches.forEach(user => {
       const li = document.createElement("li");
-      li.innerHTML = `<img src="https://a.akatsuki.gg/${user.id}.png" onerror="this.src='default.png'"> ${user.username}`;
+      li.innerHTML = `<img src="https://a.akatsuki.gg/${user.id}.png" onerror="this.src='images/default.png'"> ${user.username}`;
       li.addEventListener("click", () => {
         input.value = user.id;
         suggestions.innerHTML = "";
