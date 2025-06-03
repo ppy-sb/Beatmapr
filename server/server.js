@@ -34,7 +34,7 @@ app.get('/api/fetch-scores', (req, res) => {
   if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
   const scriptPath = path.resolve(__dirname, 'fetch_ranked_scores.py');
-  const pythonCommand = `python3 "${scriptPath}" ${userId}`;
+  const pythonCommand = `python3.13 "${scriptPath}" ${userId}`;
   console.log(`Running: ${pythonCommand}`);
 
   exec(pythonCommand, (error, stdout, stderr) => {
