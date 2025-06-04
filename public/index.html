@@ -21,15 +21,18 @@
     <!--Navigation Banner-->
     <nav class="navbar">
       <div class="nav-container">
-        <div class="logo">Beatmap Checker</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-button">Home</a>
+            <a href="leaderboards.html" class="nav-button">Leaderboards</a>
+        </div>
 
-    <form class="search-form" action="/search" method="GET">
-      <div class="input-wrapper">
-        <input type="text" name="player" placeholder="Search player..." autocomplete="off" />
-        <ul id="user-suggestions" class="suggestions-list"></ul>
-      </div>
-      <button type="submit">Search</button>
-    </form>
+        <form class="search-form" action="/search" method="GET">
+          <div class="input-wrapper">
+            <input type="text" name="player" placeholder="Search player..." autocomplete="off" />
+            <ul id="user-suggestions" class="suggestions-list"></ul>
+          </div>
+          <button type="submit">Search</button>
+        </form>
 
         <div class="auth-buttons">
           <!--<a href="/login" class="btn">Login</a>-->

@@ -1,0 +1,79 @@
+[
+    {
+        "packName": "Rohi",
+        "beatmaps": [
+            {
+                "beatmap_id": 185667,
+                "beatmapset_id": 58737,
+                "title": "Kodoku Egoism",
+                "artist": "Rohi",
+                "version": "Nold",
+                "mode_int": 0,
+                "time_duration_seconds": 143,
+                "total_length_seconds": 89,
+                "star_rating": 5.63,
+                "ranked_status": "RANKED"
+            },
+            {
+                "beatmap_id": 187507,
+                "beatmapset_id": 58737,
+                "title": "Kodoku Egoism",
+                "artist": "Rohi",
+                "version": "Skystar",
+                "mode_int": 0,
+                "time_duration_seconds": 142,
+                "total_length_seconds": 89,
+                "star_rating": 5.53,
+                "ranked_status": "RANKED"
+            },
+            {
+                "beatmap_id": 196673,
+                "beatmapset_id": 58737,
+                "title": "Kodoku Egoism",
+                "artist": "Rohi",
+                "version": "Rin",
+                "mode_int": 0,
+                "time_duration_seconds": 142,
+                "total_length_seconds": 89,
+                "star_rating": 5.41,
+                "ranked_status": "RANKED"
+            },
+            {
+                "beatmap_id": 189312,
+                "beatmapset_id": 58737,
+                "title": "Kodoku Egoism",
+                "artist": "Rohi",
+                "version": "Regou's Hard",
+                "mode_int": 0,
+                "time_duration_seconds": 142,
+                "total_length_seconds": 89,
+                "star_rating": 3.86,
+                "ranked_status": "RANKED"
+            },
+            {
+                "beatmap_id": 179353,
+                "beatmapset_id": 58737,
+                "title": "Kodoku Egoism",
+                "artist": "Rohi",
+                "version": "Normal",
+                "mode_int": 0,
+                "time_duration_seconds": 142,
+                "total_length_seconds": 89,
+                "star_rating": 2.76,
+                "ranked_status": "RANKED"
+            },
+            {
+                "beatmap_id": 187506,
+                "beatmapset_id": 58737,
+                "title": "Kodoku Egoism",
+                "artist": "Rohi",
+                "version": "alacat's Easy",
+                "mode_int": 0,
+                "time_duration_seconds": 141,
+                "total_length_seconds": 89,
+                "star_rating": 1.71,
+                "ranked_status": "RANKED"
+            }
+        ]
+    }
+]
