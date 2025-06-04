@@ -6,6 +6,8 @@ import ujson
 import json
 import sys
 import os
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 async def fetch_page_async(session, user_id, page):
     url = f"https://akatsuki.gg/api/v1/users/scores/best?mode=0&p={page}&l=100&rx=1&id={user_id}"
@@ -67,7 +69,8 @@ def write_scores_to_file(scores, filename):
             rank = score["rank"]
             score_value = score["score"]
             total_score_value += score_value
-            file.write(f"{beatmap_id}\n")
+            if str(beatmap_id).isdigit():
+                file.write(f"{beatmap_id}\n")
             if rank in rank_counts:
                 rank_counts[rank] += 1
 
@@ -86,6 +89,8 @@ def read_beatmap_ids_from_file(filename):
             if line.isdigit():
                 beatmap_ids.append(int(line))
     return beatmap_ids
+    print(f"[DEBUG] Beatmap IDs read: {len(beatmap_ids)}")
+    print(f"[DEBUG] Unique: {len(set(beatmap_ids))}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -113,7 +118,14 @@ if __name__ == "__main__":
     write_scores_to_file(scores, output_filename)
     print(f"[OK] Written to {output_filename}. Pages: {page_count}. Total time: {time.time() - start:.2f}s")
 
-    beatmap_ids = read_beatmap_ids_from_file(output_filename)
+    # Read beatmap IDs as done in frontend logic
+    beatmap_ids = []
+    with open(output_filename, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if line.isdigit():
+                beatmap_ids.append(int(line))
+    beatmap_ids = list(set(beatmap_ids))  # remove duplicates just in case
     print(f"Loaded {len(beatmap_ids)} beatmap IDs")
 
     # Load all pack beatmap IDs
@@ -140,6 +152,7 @@ if __name__ == "__main__":
         if str(user["id"]) == str(user_id):
             user["cleared_beatmaps"] = cleared
             user["completion_percent"] = round(percent, 2)
+            user["last_updated"] = datetime.now(ZoneInfo("Europe/London")).strftime("%d/%m/%Y %H:%M")
             break
 
     with open(users_path, "w", encoding="utf-8") as f:

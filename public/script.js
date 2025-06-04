@@ -424,7 +424,7 @@ ${matched} / ${total}`;
       if (rankLine) {
         const rankCounts = {};
         ["SSH", "SH", "SS", "S", "A", "B", "C", "D"].forEach(rank => {
-          const match = rankLine.match(new RegExp(`${rank}:\\s*(\\d+)`));
+          const match = rankLine.match(new RegExp(`\\b${rank}:\\s*(\\d+)\\b`));
           rankCounts[rank] = match ? parseInt(match[1]) : 0;
         });
 
@@ -469,7 +469,7 @@ ${matched} / ${total}`;
       if (rankLine) {
         const rankCounts = {};
         ["SSH", "SH", "SS", "S", "A", "B", "C", "D"].forEach(rank => {
-          const match = rankLine.match(new RegExp(`${rank}:\\s*(\\d+)`));
+          const match = rankLine.match(new RegExp(`\\b${rank}:\\s*(\\d+)\\b`));
           rankCounts[rank] = match ? parseInt(match[1]) : 0;
         });
 

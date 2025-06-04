@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>${user.username}</td>
         <td>${user.country}</td>
         <td>${user.cleared_beatmaps.toLocaleString()} (${user.completion_percent?.toFixed(2) || "0.00"}%)</td>
+        <td>${user.last_updated || "N/A"}</td>
       `;
       tbody.appendChild(tr);
     });

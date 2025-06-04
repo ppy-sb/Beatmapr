@@ -492,19 +492,19 @@ html, body {
 }
 
 .leaderboard-gold {
-  background-color: #FFD700; /* Gold */
+  background-color:rgb(214, 203, 138); /* Gold */
   color: #000;
   font-weight: bold;
 }
 
 .leaderboard-silver {
-  background-color: #C0C0C0; /* Silver */
+  background-color:rgb(105, 103, 103); /* Silver */
   color: #000;
   font-weight: bold;
 }
 
 .leaderboard-bronze {
-  background-color: #CD7F32; /* Bronze */
+  background-color:rgb(194, 157, 120); /* Bronze */
   color: #000;
   font-weight: bold;
 }
