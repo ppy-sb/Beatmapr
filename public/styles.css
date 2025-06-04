@@ -459,6 +459,79 @@ html, body {
   font-size: 0.95rem;
 }
 
+/* Leaderboards Style */
+
+.leaderboard-table {
+    width: 90%;
+    margin: 2rem auto;
+    border-collapse: collapse;
+    background-color: #1e1e1e;
+    color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.leaderboard-table th, .leaderboard-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+.leaderboard-table th {
+    background-color: #2c2c2c;
+    font-weight: 600;
+}
+
+.leaderboard-table tr:hover {
+    background-color: #333;
+}
+
+.leaderboard-table td:first-child {
+    font-weight: bold;
+}
+
+.leaderboard-gold {
+  background-color: #FFD700; /* Gold */
+  color: #000;
+  font-weight: bold;
+}
+
+.leaderboard-silver {
+  background-color: #C0C0C0; /* Silver */
+  color: #000;
+  font-weight: bold;
+}
+
+.leaderboard-bronze {
+  background-color: #CD7F32; /* Bronze */
+  color: #000;
+  font-weight: bold;
+}
+
+.pagination-controls button {
+  padding: 0.5rem 1.2rem;
+  margin: 0 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #1e1e1e;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 100px;
+}
+
+.pagination-controls button:hover {
+  background-color:rgb(53, 52, 52);
+}
+
+.pagination-controls button:disabled {
+  cursor: not-allowed;
+}
+
+
 
 
 

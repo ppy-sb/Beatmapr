@@ -16,7 +16,7 @@
 <body>
 
     <div class="page-wrapper">
-        <script src="script.js" defer></script>
+        <script src="leaderboards.js" defer></script>
 
         <!--Navigation Banner-->
         <nav class="navbar">
@@ -32,9 +32,29 @@
             <div class="packs-header" style="text-align: left; margin: 1rem 0 0.5rem 1rem; color: #fff;">
             </div>
             <div class="beatmaps">
-                <div class="squares"></div>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Country</th>
+                            <th>Total Scores</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Data will be injected here -->
+                    </tbody>
+                </table>
+                    <!-- Pagination Controls -->
+                    <div class="pagination-controls" style="text-align: center; margin: 1rem 0;">
+                        <button id="prev-page">Previous</button>
+                        <span id="page-indicator">Page 1</span>
+                        <button id="next-page">Next</button>
+                    </div>
             </div>
         </div>
+
+
         <footer class="site-footer">
             <div class="footer-content">
                 <p class="footer-note">

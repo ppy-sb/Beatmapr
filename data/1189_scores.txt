@@ -1,0 +1,6 @@
+1036393
+676109
+422328
+Total scores: 3
+Average score: 84190.00
+SSH: 1, SH: 1, SS: 0, S: 0, A: 0, B: 1, C: 0, D: 0

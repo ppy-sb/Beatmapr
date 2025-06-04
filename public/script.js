@@ -499,19 +499,43 @@ ${matched} / ${total}`;
   const exportButton = document.getElementById("export-button");
 
   exportButton.addEventListener("click", () => {
-    if (!lastLoadedScoreFileContent) {
-      statusDisplay.textContent = "No score file loaded to export.";
+    const squares = document.querySelectorAll(".square");
+    const packGroups = {};
+
+    squares.forEach(square => {
+      const packNameMatch = square.dataset.tooltip?.match(/^(\S+)/); // Get the pack name like "S1"
+      const packName = packNameMatch ? packNameMatch[1] : "Unknown Pack";
+
+      const beatmapIdsInPack = square.dataset.beatmaps
+        .split(",")
+        .map(id => parseInt(id.trim(), 10))
+        .filter(id => !beatmapIds.has(id)); // only UNCLEARED beatmaps
+
+      if (beatmapIdsInPack.length > 0) {
+        packGroups[packName] = beatmapIdsInPack;
+      }
+    });
+
+    let exportText = "";
+    for (const [pack, ids] of Object.entries(packGroups)) {
+      exportText += `${pack}\n`;
+      exportText += `${ids.join(",")}\n\n`;
+    }
+
+    if (!exportText.trim()) {
+      statusDisplay.textContent = "No unchecked beatmaps to export.";
       return;
     }
 
-    const blob = new Blob([lastLoadedScoreFileContent], { type: "text/plain" });
+    const blob = new Blob([exportText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${currentUserId || "scores"}_export.txt`;
+    a.download = `${currentUserId || "unchecked"}_beatmaps.txt`;
     a.click();
 
     URL.revokeObjectURL(url);
+    statusDisplay.textContent = "Unchecked beatmaps exported.";
   });
 });

@@ -1,0 +1,5 @@
+1051587
+714001
+Total scores: 2
+Average score: 101565.00
+SSH: 0, SH: 0, SS: 0, S: 0, A: 1, B: 1, C: 0, D: 0

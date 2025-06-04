@@ -1,0 +1,7 @@
+954692
+1348764
+129891
+890190
+Total scores: 4
+Average score: 416645.00
+SSH: 0, SH: 1, SS: 0, S: 0, A: 3, B: 0, C: 0, D: 0

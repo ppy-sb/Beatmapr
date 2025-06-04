@@ -1,0 +1,5 @@
+975588
+1020502
+Total scores: 2
+Average score: 269655.00
+SSH: 0, SH: 0, SS: 0, S: 0, A: 2, B: 0, C: 0, D: 0
