@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     sortedUsers = users
       .filter(user => typeof user.cleared_beatmaps === "number")
       .sort((a, b) => b.cleared_beatmaps - a.cleared_beatmaps) // descending
-      .reverse();
 
     renderPage(currentPage);
   } catch (err) {
