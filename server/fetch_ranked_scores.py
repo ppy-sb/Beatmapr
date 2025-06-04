@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 import time
 import ujson
+import json
 import sys
 import os
 
@@ -114,3 +115,35 @@ if __name__ == "__main__":
 
     beatmap_ids = read_beatmap_ids_from_file(output_filename)
     print(f"Loaded {len(beatmap_ids)} beatmap IDs")
+
+    # Load all pack beatmap IDs
+    packs_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "packs.json"))
+    with open(packs_path, "r", encoding="utf-8") as f:
+        packs = ujson.load(f)
+
+    all_pack_ids = set()
+    for pack in packs:
+        for bm in pack["beatmaps"]:
+            all_pack_ids.add(int(bm["beatmap_id"]))
+
+    # Count how many maps the user cleared
+    cleared = len(set(beatmap_ids) & all_pack_ids)
+    total = len(all_pack_ids)
+    percent = (cleared / total) * 100 if total > 0 else 0
+
+    # Update users.json
+    users_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "users.json"))
+    with open(users_path, "r", encoding="utf-8") as f:
+        users = json.load(f)
+
+    for user in users:
+        if str(user["id"]) == str(user_id):
+            user["cleared_beatmaps"] = cleared
+            user["completion_percent"] = round(percent, 2)
+            break
+
+    with open(users_path, "w", encoding="utf-8") as f:
+        json.dump(users, f, indent=2)
+
+    print(f"Updated users.json with cleared_beatmaps={cleared} and completion_percent={percent:.2f}%")
+

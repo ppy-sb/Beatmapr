@@ -1,6 +1,0 @@
-555797
-1201636
-1031991
-Total scores: 3
-Average score: 699970.00
-SSH: 0, SH: 0, SS: 0, S: 0, A: 2, B: 1, C: 0, D: 0

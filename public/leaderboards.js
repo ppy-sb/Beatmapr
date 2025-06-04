@@ -13,8 +13,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const users = await response.json();
 
     sortedUsers = users
-      .filter(user => typeof user.total_scores === "number")
-      .sort((a, b) => b.total_scores - a.total_scores);
+      .filter(user => typeof user.cleared_beatmaps === "number")
+      .sort((a, b) => b.cleared_beatmaps - a.cleared_beatmaps) // descending
+      .reverse();
 
     renderPage(currentPage);
   } catch (err) {
@@ -31,7 +32,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     usersToShow.forEach((user, index) => {
       const tr = document.createElement("tr");
 
-      // Apply rank-based highlights (across full list)
       if (start + index === 0) tr.classList.add("leaderboard-gold");
       else if (start + index === 1) tr.classList.add("leaderboard-silver");
       else if (start + index === 2) tr.classList.add("leaderboard-bronze");
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>#${start + index + 1}</td>
         <td>${user.username}</td>
         <td>${user.country}</td>
-        <td>${user.total_scores.toLocaleString()}</td>
+        <td>${user.cleared_beatmaps.toLocaleString()} (${user.completion_percent?.toFixed(2) || "0.00"}%)</td>
       `;
       tbody.appendChild(tr);
     });
