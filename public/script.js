@@ -45,12 +45,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  const packsResponse = await fetch("packs.json");
+  const packsResponse = await fetch("/packs");
   const packs = await packsResponse.json();
   console.log("Standard packs loaded:", packs);
   let beatmapIds = new Set();
 
-  const otherPacksResponse = await fetch("other_packs.json");
+  const otherPacksResponse = await fetch("/other_packs");
   const otherPacksRaw = await otherPacksResponse.json();
   // Flatten all sections into one array
   const otherPacks = [
