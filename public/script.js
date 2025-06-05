@@ -261,6 +261,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (beatmapData) {
         const idSpan = document.createElement("span");
         idSpan.textContent = ` ${beatmapData.title} [${beatmapData.version}] - ${time}`;
+        if (beatmapData.star_rating) {
+          idSpan.textContent += ` (${parseFloat(beatmapData.star_rating).toFixed(2)}★)`;
+        }
         
         const copyLink = document.createElement("span");
         copyLink.textContent = `${id}`;
@@ -276,6 +279,77 @@ document.addEventListener("DOMContentLoaded", async () => {
           setTimeout(() => (copyLink.textContent = `${id}`), 1000);
         });
 
+        const playBtn = document.createElement("span");
+        playBtn.textContent = "▶️";
+        playBtn.classList.add("preview-toggle");
+        playBtn.title = "Play preview";
+
+        const audio = document.getElementById("preview-player");
+        audio.volume = 0.1;
+
+        playBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+
+          const src = `https://b.ppy.sh/preview/${beatmapsetId}.mp3`;
+          const isSame = audio.src === src;
+          const isPaused = audio.paused;
+
+          // Reset all buttons
+          document.querySelectorAll(".preview-toggle").forEach(btn => {
+            btn.textContent = "▶️";
+          });
+
+          // Detach old onended
+          audio.onended = null;
+
+          if (!isPaused && isSame) {
+            fadeOutAudio(audio, () => {
+              playBtn.textContent = "▶️";
+            });
+          } else {
+            audio.src = src;
+            audio.play().then(() => {
+              playBtn.textContent = "⏸️";
+              fadeInAudio(audio);
+
+              // Reset icon when audio ends
+              audio.onended = () => {
+                playBtn.textContent = "▶️";
+              };
+            }).catch(err => {
+              console.error("Preview play error:", err);
+            });
+          }
+        });
+
+        function fadeInAudio(audio, targetVolume = 0.1, step = 0.01, interval = 30) {
+          audio.volume = 0;
+          const fade = setInterval(() => {
+            if (audio.volume < targetVolume) {
+              audio.volume = Math.min(audio.volume + step, targetVolume);
+            } else {
+              clearInterval(fade);
+            }
+          }, interval);
+        }
+
+        function fadeOutAudio(audio, onDone, step = 0.01, interval = 30) {
+          const fade = setInterval(() => {
+            if (audio.volume > step) {
+              audio.volume = Math.max(audio.volume - step, 0);
+            } else {
+              clearInterval(fade);
+              audio.pause();
+              audio.currentTime = 0;
+              if (onDone) onDone();
+            }
+          }, interval);
+        }
+
+
+
+        label.appendChild(playBtn);
         label.appendChild(copyLink);
         label.appendChild(idSpan);
       } else {
@@ -345,9 +419,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     modal.classList.remove("hidden");
   }
 
-  closeModalBtn.addEventListener("click", () => modal.classList.add("hidden"));
+  closeModalBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+
+    // Stop preview audio if playing
+    const audio = document.getElementById("preview-player");
+    if (!audio.paused) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+
+    // Reset all preview buttons to ▶️
+    document.querySelectorAll(".preview-toggle").forEach(btn => {
+      btn.textContent = "▶️";
+    });
+  });
   window.addEventListener("click", (e) => {
-    if (e.target === modal) modal.classList.add("hidden");
+    if (e.target === modal) {
+      modal.classList.add("hidden");
+
+      // Stop preview audio if playing
+      const audio = document.getElementById("preview-player");
+      if (!audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+
+      // Reset all preview buttons to ▶️
+      document.querySelectorAll(".preview-toggle").forEach(btn => {
+        btn.textContent = "▶️";
+      });
+    }
   });
 
   function updateSquareColor(square, beatmaps) {
