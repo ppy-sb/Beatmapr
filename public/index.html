@@ -75,21 +75,31 @@
     <!--Beatmap Packs Banner-->
     <div class="beatmap-container">
       <div class="packs-header" style="text-align: left; margin: 1rem 0 0.5rem 1rem; color: #fff;">
-        <h3 style="margin: 0;">Standard Packs - Completed: <span id="completed-pack-count">0</span> / <span id="total-pack-count">0</span> <span class="progress-section"></span> </h3>
-            <!--Progress Banner-->
+        <h3 style="margin: 0;">
+          Standard Packs - Completed: <span id="completed-pack-count">0</span> / <span id="total-pack-count">0</span> <span class="progress-section"></span>
+        </h3>
       </div>
       <div class="beatmaps">
-        <div class="squares"></div>
+        <div class="squares" id="standard-squares"></div>
       </div>
     </div>
 
-        <!--Beatmap Packs Banner-->
+        <!--Other Packs Banner-->
     <div class="beatmap-container">
       <div class="packs-header" style="text-align: left; margin: 1rem 0 0.5rem 1rem; color: #fff;">
-        <h3 style="margin: 0;">Other Packs</h3>
+        <h3 style="margin: 0;">
+          Other Packs — Completed: 
+          <span id="other-completed-packs">0</span> / 
+          <span id="other-total-packs">0</span> packs 
+          (<span id="other-pack-percent">0.00</span>%)
+          — Beatmaps: 
+          <span id="other-completed-count">0</span> / 
+          <span id="other-total-count">0</span> 
+          (<span id="other-completion-percent">0.00</span>%)
+        </h3>
       </div>
       <div class="beatmaps">
-        <div class="squares"></div>
+        <div class="squares" id="other-squares"></div>
       </div>
     </div>
 

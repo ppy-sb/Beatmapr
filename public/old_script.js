@@ -2,8 +2,7 @@ let currentUserId = null;
 let lastLoadedScoreFileContent = "";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const standardSquaresContainer = document.getElementById("standard-squares");
-  const otherSquaresContainer = document.getElementById("other-squares");
+  const squaresContainer = document.querySelector(".squares");
   const statusDisplay = document.getElementById("status");
   const tooltip = document.getElementById("custom-tooltip");
 
@@ -47,124 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const packsResponse = await fetch("packs.json");
   const packs = await packsResponse.json();
-  console.log("Standard packs loaded:", packs);
   let beatmapIds = new Set();
-
-  const otherPacksResponse = await fetch("other_packs.json");
-  const otherPacksRaw = await otherPacksResponse.json();
-  // Flatten all sections into one array
-  const otherPacks = [
-    ...(otherPacksRaw.featured || []),
-    ...(otherPacksRaw.tournament || []),
-    ...(otherPacksRaw.loved || []),
-    ...(otherPacksRaw.chart || []),
-    ...(otherPacksRaw.theme || []),
-    ...(otherPacksRaw.artist || [])
-  ];
-  console.log("otherPacks loaded:", otherPacks);
-
-  otherPacks.forEach((pack) => {
-    const square = document.createElement("div");
-    square.classList.add("square");
-    square.dataset.beatmaps = pack.beatmaps.map(b => b.beatmap_id).join(",");
-
-    updateSquareColor(square, pack.beatmaps);
-    updateSquareTooltip(square, pack.packName, pack.beatmaps);
-    otherSquaresContainer.appendChild(square);
-
-    square.addEventListener("click", () => {
-      const beatmaps = pack.beatmaps.map(b => b.beatmap_id);
-      showModal(beatmaps, pack.beatmaps, square, pack.packName, false);
-    });
-
-    square.addEventListener("mousemove", (e) => {
-      tooltip.classList.remove("hidden");
-      tooltip.textContent = square.dataset.tooltip;
-
-      const tooltipWidth = tooltip.offsetWidth;
-      const tooltipHeight = tooltip.offsetHeight;
-      const padding = 10;
-      const pageWidth = window.innerWidth;
-      const pageHeight = window.innerHeight;
-
-      let left = e.pageX + padding;
-      let top = e.pageY + padding;
-
-      if (left + tooltipWidth > pageWidth) {
-        left = e.pageX - tooltipWidth - padding;
-      }
-
-      if (top + tooltipHeight > pageHeight) {
-        top = e.pageY - tooltipHeight - padding;
-      }
-
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${top}px`;
-    });
-
-    square.addEventListener("mouseleave", () => {
-      tooltip.classList.add("hidden");
-    });
-  });
-
-  function updateOtherPackCompletionStats(otherPacks) {
-    let totalBeatmaps = 0;
-    let clearedBeatmaps = 0;
-    let totalPacks = otherPacks.length;
-    let clearedPacks = 0;
-
-    otherPacks.forEach(pack => {
-      totalBeatmaps += pack.beatmaps.length;
-      const clearedInPack = pack.beatmaps.filter(b => beatmapIds.has(b.beatmap_id)).length;
-      clearedBeatmaps += clearedInPack;
-
-      if (clearedInPack === pack.beatmaps.length) {
-        clearedPacks++;
-      }
-    });
-
-    const beatmapPercent = totalBeatmaps > 0 ? ((clearedBeatmaps / totalBeatmaps) * 100).toFixed(2) : "0.00";
-    const packPercent = totalPacks > 0 ? ((clearedPacks / totalPacks) * 100).toFixed(2) : "0.00";
-
-    document.getElementById("other-completed-count").textContent = clearedBeatmaps;
-    document.getElementById("other-total-count").textContent = totalBeatmaps;
-    document.getElementById("other-completion-percent").textContent = beatmapPercent;
-
-    document.getElementById("other-completed-packs").textContent = clearedPacks;
-    document.getElementById("other-total-packs").textContent = totalPacks;
-    document.getElementById("other-pack-percent").textContent = packPercent;
-  }
-
-  function updateStandardPackCompletionStats() {
-    let totalBeatmaps = 0;
-    let clearedBeatmaps = 0;
-    let totalPacks = sortedPacks.length;
-    let clearedPacks = 0;
-
-    sortedPacks.forEach(pack => {
-      totalBeatmaps += pack.beatmaps.length;
-      const clearedInPack = pack.beatmaps.filter(b => standardBeatmapIds.has(b.beatmap_id)).length;
-      clearedBeatmaps += clearedInPack;
-
-      if (clearedInPack === pack.beatmaps.length) {
-        clearedPacks++;
-      }
-    });
-
-    const beatmapPercent = totalBeatmaps > 0 ? ((clearedBeatmaps / totalBeatmaps) * 100).toFixed(2) : "0.00";
-    const packPercent = totalPacks > 0 ? ((clearedPacks / totalPacks) * 100).toFixed(2) : "0.00";
-
-    document.getElementById("standard-completed-count").textContent = clearedBeatmaps;
-    document.getElementById("standard-total-count").textContent = totalBeatmaps;
-    document.getElementById("standard-completion-percent").textContent = beatmapPercent;
-
-    document.getElementById("standard-completed-packs").textContent = clearedPacks;
-    document.getElementById("standard-total-packs").textContent = totalPacks;
-  }
-
-
-
-
 
   const sortedPacks = [...packs].sort((a, b) => {
     const aNum = parseInt(a.packName.replace("S", ""));
@@ -193,11 +75,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     updateSquareColor(square, pack.beatmaps);
     updateSquareTooltip(square, pack.packName, pack.beatmaps);
-    standardSquaresContainer.appendChild(square);
+    squaresContainer.appendChild(square);
 
     square.addEventListener("click", () => {
       const beatmaps = pack.beatmaps.map(b => b.beatmap_id);
-      showModal(beatmaps, pack.beatmaps, square, pack.packName, true);
+      showModal(beatmaps, pack.beatmaps, square, pack.packName);
     });
 
     // Tooltip logic
@@ -235,7 +117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const beatmapList = document.getElementById("beatmap-list");
   const closeModalBtn = document.querySelector(".close-btn");
 
-  function showModal(beatmaps, fullBeatmapData, squareElement, packName, isStandard = true) {
+  function showModal(beatmaps, fullBeatmapData, squareElement, packName) {
     beatmapList.innerHTML = "";
 
     beatmaps.forEach(id => {
@@ -285,34 +167,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       label.style.color = checkbox.checked ? "#4CAF50" : "#F44336";
 
       checkbox.addEventListener("change", () => {
-        if (isStandard) {
-          if (checkbox.checked) {
-            beatmapIds.add(id);
-          } else {
-            beatmapIds.delete(id);
-          }
-
-          updateSquareColor(squareElement, fullBeatmapData);
-          updateCompletionText();
-          updateSquareTooltip(squareElement, packName, fullBeatmapData);
-          updateCompletedPackCount();
-          updateStandardPackCompletionStats();
+        if (checkbox.checked) {
+          beatmapIds.add(id);
         } else {
-          // ⚠️ FIX: ensure beatmapIds is still updated for tracking
-          if (checkbox.checked) {
-            beatmapIds.add(id);
-          } else {
-            beatmapIds.delete(id);
-          }
-
-          updateSquareColor(squareElement, fullBeatmapData);
-          updateSquareTooltip(squareElement, packName, fullBeatmapData);
-          updateOtherPackCompletionStats(otherPacks);
+          beatmapIds.delete(id);
         }
-
+        updateSquareColor(squareElement, fullBeatmapData);
+        updateCompletionText();
+        updateSquareTooltip(squareElement, packName, fullBeatmapData);
         label.style.color = checkbox.checked ? "#4CAF50" : "#F44336";
+        updateCompletedPackCount(); // ← Add this
       });
-
 
       overlay.appendChild(checkbox);
       overlay.appendChild(label);
@@ -501,7 +366,6 @@ ${matched} / ${total}`;
       updateAllSquares();
       updateCompletionText();
       updateCompletedPackCount();
-      updateOtherPackCompletionStats(otherPacks);
 
       // Extract user ID from filename
       const idFromFilename = file.name.match(/^(\d+)_((scores|export))\.txt$/)?.[1];
@@ -598,7 +462,6 @@ ${matched} / ${total}`;
       updateAllSquares();
       updateCompletionText();
       updateCompletedPackCount();
-      updateOtherPackCompletionStats(otherPacks);
 
       const rankLine = lines.find(line =>
         line.includes("SSH:") && line.includes("SH:") && line.includes("SS:")
