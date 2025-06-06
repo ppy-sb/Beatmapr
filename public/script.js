@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     ...(otherPacksRaw.artist || [])
   ];
   console.log("otherPacks loaded:", otherPacks);
+  updateOtherPackCompletionStats(otherPacks);
 
   otherPacks.forEach((pack) => {
     const square = document.createElement("div");
