@@ -1,3 +1,6 @@
+# This script retrieves other packs only related to osu standard mode which arent ranked beatmap-packs, also will scan for other_packs.json
+# and will resume from latest pack.
+
 from ossapi import BeatmapPackType, BeatmapPack
 from datetime import datetime
 

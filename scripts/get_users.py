@@ -1,3 +1,6 @@
+# Gets all Akatsuki relax users and adds it to users.json file, will only add new users who aren't in the list
+# This is also used for search players QUERY - Database not implement and just using .json files.
+
 import asyncio
 import aiohttp
 import ujson as json

@@ -1,3 +1,5 @@
+# This script retrieves ranked osu beatmap packs via osu API. It scans for packs.json and will resume from the previous pack.
+
 from datetime import datetime
 import ossapi
 import json
@@ -5,7 +7,7 @@ import time
 import os
 import re
 
-# Your client credentials
+# Not the best way to put credentials in open like this, but for now its okay.
 CLIENT_ID = 31586
 API_KEY = "Sty09gmsufGNjadWZyhNftashebxHV7lML7YFJJy"
 

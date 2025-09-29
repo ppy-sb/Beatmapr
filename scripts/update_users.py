@@ -1,3 +1,5 @@
+# This updates the users.json file with extra data information - not important script - run by the website not manual.
+
 import json
 import os
 import re
