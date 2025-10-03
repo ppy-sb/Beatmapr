@@ -151,7 +151,7 @@ if __name__ == "__main__":
     for user in users:
         if str(user["id"]) == str(user_id):
             user["cleared_beatmaps"] = cleared
-            user["completion_percent"] = round(percent, 2)
+            user["completion_percent"] = round(percent, 3)
             user["last_updated"] = datetime.now(ZoneInfo("Europe/London")).strftime("%d/%m/%Y %H:%M")
             break
 
