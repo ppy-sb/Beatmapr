@@ -1,0 +1,33 @@
+[project]
+name = "beatmapr"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Syneergy", email = "syneergy@example.com"},
+    {name = "Murmur Twins", email = "murmurtwins@example.com"},
+    {name = "TuRou", email = "truerou@outlook.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+packages = [
+    { include = "beatmapr" }
+]
+dependencies = [
+    "fastapi (>=0.111.0)",
+    "uvicorn[standard] (>=0.30.0)",
+    "sqlalchemy (>=2.0.29)",
+    "pydantic (>=2.7.0)",
+    "pydantic-settings (>=2.2.1)",
+    "httpx (>=0.27.0)",
+    "ossapi (>=3.4.3)",
+    "aiofiles (>=24.1.0)",
+    "tzdata (>=2025.2,<2026.0)",
+    "typer (>=0.12.3)"
+]
+
+[tool.poetry.scripts]
+scripts = "beatmapr.scripts:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
