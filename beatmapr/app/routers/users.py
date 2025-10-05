@@ -1,17 +1,21 @@
 from __future__ import annotations
 
-from typing import Any
+import asyncio
+import json
+from typing import Any, AsyncIterator
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from beatmapr.app.database import get_db
 from beatmapr.app.models import Pack, PackBeatmap, User, UserScore
 from beatmapr.app.schemas import PackProgress, RankCounts, SearchUserItem, TotalsSummary, UserProfileResponse, UserSummary
-from beatmapr.app.updaters import refresh_user_data
+from beatmapr.app.updaters.refresh import RefreshProgressBroker, UserDataRefresher
 
 router = APIRouter(prefix="/users", tags=["users"])
+progress_broker = RefreshProgressBroker()
 
 
 @router.get("/search", response_model=list[SearchUserItem])
@@ -31,8 +35,31 @@ def search_users(
 
 @router.post("/{user_id}/refresh", response_model=RankCounts)
 async def refresh_user(user_id: int, db: Session = Depends(get_db)) -> RankCounts:
-    counts = await refresh_user_data(db, user_id)
+    await progress_broker.reset(user_id)
+    refresher = UserDataRefresher(db, user_id, broker=progress_broker)
+    counts = await refresher.run()
     return RankCounts(**{k: counts.get(k, 0) for k in ["SSH", "SS", "SH", "S", "A", "B", "C", "D"]})
+
+
+@router.get("/{user_id}/refresh/stream")
+async def subscribe_refresh_progress(user_id: int) -> StreamingResponse:
+    async def event_stream() -> AsyncIterator[str]:
+        async with progress_broker.connect(user_id) as queue:
+            try:
+                yield "retry: 2000\n\n"
+                while True:
+                    event = await queue.get()
+                    payload = json.dumps(event.to_dict(), ensure_ascii=False)
+                    yield f"id: {event.sequence}\ndata: {payload}\n\n"
+            except asyncio.CancelledError:  # client disconnected
+                raise
+
+    headers = {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+    }
+    return StreamingResponse(event_stream(), media_type="text/event-stream", headers=headers)
 
 
 @router.get("/{user_id}/profile", response_model=UserProfileResponse)

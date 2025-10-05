@@ -20,7 +20,8 @@
       <p v-if="statusMessage" class="status-message">{{ statusMessage }}</p>
 
       <ProfileBanner :profile="userStore.profile" :counts="userStore.rankCounts" :refreshing="userStore.refreshing"
-        @refresh="userStore.refreshUser" />
+        :progress="userStore.refreshEvents" :progress-status="userStore.refreshStatus"
+        :refresh-error="userStore.refreshError" @refresh="userStore.refreshUser" />
 
       <div class="grid-section" v-if="packsLoaded">
         <PackGrid title="Standard Packs" :packs="userStore.profile?.standard || []" @hover="showTooltip"
@@ -42,7 +43,7 @@
 
     <PackModal :visible="modal.visible" :pack="modal.data" @close="closeModal" />
 
-    <LoadingOverlay :visible="isLoading" message="Loading data..." />
+    <!-- <LoadingOverlay :visible="isLoading" message="Loading data..." /> -->
 
     <SiteFooter />
   </div>
@@ -69,6 +70,7 @@ const searchQuery = ref('');
 const showSuggestions = ref(false);
 const statusMessage = ref('');
 let searchTimer = null;
+let refreshSuccessTimer = null;
 
 const tooltip = reactive({
   visible: false,
@@ -96,6 +98,14 @@ const getDefaultAvatarUrl = () => {
 
 const onSuggestionImageError = (event) => {
   event.target.src = getDefaultAvatarUrl();
+};
+
+const refreshStatusHints = {
+  connecting: 'Connecting to refresh stream…',
+  listening: 'Waiting for refresh to start…',
+  running: 'Refreshing player data…',
+  warning: 'Retrying refresh request…',
+  closed: 'Progress stream closed.',
 };
 
 watch(searchQuery, (value) => {
@@ -136,6 +146,40 @@ watch(
   }
 );
 
+watch(
+  () => userStore.refreshError,
+  (error) => {
+    if (error) {
+      statusMessage.value = error;
+    }
+  }
+);
+
+watch(
+  () => userStore.refreshStatus,
+  (status) => {
+    if (status === 'success') {
+      clearTimeout(refreshSuccessTimer);
+      statusMessage.value = 'Refresh complete.';
+      refreshSuccessTimer = setTimeout(() => {
+        if (statusMessage.value === 'Refresh complete.') {
+          statusMessage.value = '';
+        }
+      }, 2500);
+      return;
+    }
+
+    if (status === 'idle' && !userStore.refreshing && !userStore.refreshError) {
+      statusMessage.value = '';
+      return;
+    }
+
+    if (refreshStatusHints[status] && !userStore.refreshError) {
+      statusMessage.value = refreshStatusHints[status];
+    }
+  }
+);
+
 onMounted(async () => {
   if (!packsStore.summaryLoaded) {
     await packsStore.fetchSummary();
@@ -146,6 +190,8 @@ onMounted(async () => {
 onUnmounted(() => {
   document.removeEventListener('click', handleOutsideClick);
   clearTimeout(searchTimer);
+  clearTimeout(refreshSuccessTimer);
+  userStore.closeRefreshStream();
 });
 
 const handleOutsideClick = (event) => {
