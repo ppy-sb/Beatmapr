@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -120,3 +120,18 @@ class LeaderboardResponse(BaseModel):
     page: int
     page_size: int
     results: List[LeaderboardEntry]
+
+
+class RefreshProgressEventPayload(BaseModel):
+    user_id: int
+    stage: str
+    message: str
+    status: Literal["info", "success", "warning", "error"]
+    sequence: int
+    payload: dict[str, Any] = Field(default_factory=dict)
+    timestamp: str
+
+
+class RefreshStatusResponse(BaseModel):
+    active: bool
+    last_event: Optional[RefreshProgressEventPayload] = None

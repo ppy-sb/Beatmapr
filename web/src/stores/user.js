@@ -89,7 +89,8 @@ export const useUserStore = defineStore('user', {
       this.searchResults = [];
       this.searchError = '';
     },
-    async fetchProfile(userId) {
+    async fetchProfile(userId, options = {}) {
+      const { skipStatusCheck = false } = options;
       if (!userId) {
         this.profileError = 'Please select a player.';
         return;
@@ -106,124 +107,141 @@ export const useUserStore = defineStore('user', {
       } finally {
         this.loadingProfile = false;
       }
+
+      if (!skipStatusCheck && !this.profileError) {
+        await this.checkRefreshStatus(userId);
+      }
     },
-    async refreshUser(userId = this.selectedUserId) {
+    _handleRefreshEvent(payload) {
+      if (!payload || typeof payload !== 'object') {
+        return 'ignore';
+      }
+
+      const lastEvent = this.refreshEvents[this.refreshEvents.length - 1];
+      const lastSequence = lastEvent
+        ? String(lastEvent.sequence ?? `${lastEvent.stage}:${lastEvent.timestamp}`)
+        : null;
+      const incomingSequence = String(payload.sequence ?? `${payload.stage}:${payload.timestamp}`);
+
+      if (!lastEvent || lastSequence !== incomingSequence) {
+        this.refreshEvents.push(payload);
+        if (this.refreshEvents.length > MAX_PROGRESS_EVENTS) {
+          this.refreshEvents.shift();
+        }
+      }
+
+      if (payload.stage === 'refresh:start') {
+        this.refreshStatus = 'running';
+      } else if (payload.stage?.endsWith(':retry')) {
+        this.refreshStatus = 'warning';
+      } else if (this.refreshStatus === 'warning' && payload.status === 'info') {
+        this.refreshStatus = 'running';
+      }
+
+      if (payload.stage === 'refresh:complete') {
+        this.refreshStatus = 'success';
+        return 'complete';
+      }
+
+      if (payload.stage === 'refresh:error' || payload.status === 'error') {
+        this.refreshStatus = 'error';
+        this.refreshError = payload.message || 'Refresh failed.';
+        return 'error';
+      }
+
+      return 'ongoing';
+    },
+    _openRefreshStream(userId) {
+      const ready = createDeferred();
+      const completion = createDeferred();
+
+      try {
+        const url = buildEventStreamUrl(`/users/${userId}/refresh/stream`);
+        refreshStream = new EventSource(url);
+      } catch (error) {
+        ready.reject(error);
+        completion.reject(error);
+        return { ready: ready.promise, completion: completion.promise };
+      }
+
+      const settleCompletion = (result) => {
+        if (!completion.settled) {
+          completion.resolve(result);
+        }
+      };
+
+      refreshStream.onopen = () => {
+        this.refreshStatus = 'listening';
+        ready.resolve();
+      };
+
+      refreshStream.onmessage = (event) => {
+        if (!event.data) {
+          return;
+        }
+        let payload;
+        try {
+          payload = JSON.parse(event.data);
+        } catch (error) {
+          console.warn('Invalid refresh event payload', error, event.data);
+          return;
+        }
+        const outcome = this._handleRefreshEvent(payload);
+        if (outcome === 'complete') {
+          settleCompletion({ success: true, event: payload });
+          disposeRefreshStream();
+        } else if (outcome === 'error') {
+          settleCompletion({ success: false, event: payload });
+          disposeRefreshStream();
+        }
+      };
+
+      refreshStream.onerror = (event) => {
+        console.error('Refresh event stream error', event);
+        if (!ready.settled) {
+          ready.reject(event);
+        }
+        if (!completion.settled) {
+          if (!this.refreshError) {
+            this.refreshError = 'Refresh progress connection failed.';
+          }
+          if (this.refreshStatus !== 'success' && this.refreshStatus !== 'error') {
+            this.refreshStatus = 'error';
+          }
+          completion.reject(event);
+        }
+        const stream = event?.target ?? refreshStream;
+        if (stream && stream.readyState === EventSource.CLOSED) {
+          if (this.refreshStatus !== 'success' && this.refreshStatus !== 'error') {
+            this.refreshStatus = 'closed';
+          }
+          disposeRefreshStream();
+        }
+      };
+
+      return { ready: ready.promise, completion: completion.promise };
+    },
+    async refreshUser(userId = this.selectedUserId, options = {}) {
+      const { trigger = true, resetEvents = trigger } = options;
       if (!userId) {
         return;
       }
+
       if (this.refreshing) {
-        return;
+        if (trigger || refreshStream) {
+          return;
+        }
       }
 
-      this.refreshing = true;
-      this.refreshStatus = 'connecting';
+      if (resetEvents) {
+        this.refreshEvents = [];
+      }
       this.refreshError = '';
-      this.refreshEvents = [];
+      this.refreshStatus = 'connecting';
       disposeRefreshStream();
+      this.refreshing = true;
 
-      const openStream = () => {
-        const ready = createDeferred();
-        const completion = createDeferred();
-
-        try {
-          const url = buildEventStreamUrl(`/users/${userId}/refresh/stream`);
-          refreshStream = new EventSource(url);
-        } catch (error) {
-          ready.reject(error);
-          completion.reject(error);
-          return { ready: ready.promise, completion: completion.promise };
-        }
-
-        const settleCompletion = (result) => {
-          if (!completion.settled) {
-            completion.resolve(result);
-          }
-        };
-
-        refreshStream.onopen = () => {
-          this.refreshStatus = 'listening';
-          ready.resolve();
-        };
-
-        const handlePayload = (payload) => {
-          if (!payload || typeof payload !== 'object') {
-            return;
-          }
-
-          const lastEvent = this.refreshEvents[this.refreshEvents.length - 1];
-          const lastSequence = lastEvent
-            ? String(lastEvent.sequence ?? `${lastEvent.stage}:${lastEvent.timestamp}`)
-            : null;
-          const incomingSequence = String(payload.sequence ?? `${payload.stage}:${payload.timestamp}`);
-
-          if (!lastEvent || lastSequence !== incomingSequence) {
-            this.refreshEvents.push(payload);
-            if (this.refreshEvents.length > MAX_PROGRESS_EVENTS) {
-              this.refreshEvents.shift();
-            }
-          }
-
-          if (payload.stage === 'refresh:start') {
-            this.refreshStatus = 'running';
-          } else if (payload.stage?.endsWith(':retry')) {
-            this.refreshStatus = 'warning';
-          } else if (this.refreshStatus === 'warning' && payload.status === 'info') {
-            this.refreshStatus = 'running';
-          }
-
-          if (payload.stage === 'refresh:complete') {
-            this.refreshStatus = 'success';
-            settleCompletion({ success: true, event: payload });
-            disposeRefreshStream();
-          } else if (payload.stage === 'refresh:error' || payload.status === 'error') {
-            this.refreshStatus = 'error';
-            this.refreshError = payload.message || 'Refresh failed.';
-            settleCompletion({ success: false, event: payload });
-            disposeRefreshStream();
-          }
-        };
-
-        refreshStream.onmessage = (event) => {
-          if (!event.data) {
-            return;
-          }
-          let payload;
-          try {
-            payload = JSON.parse(event.data);
-          } catch (error) {
-            console.warn('Invalid refresh event payload', error, event.data);
-            return;
-          }
-          handlePayload(payload);
-        };
-
-        refreshStream.onerror = (event) => {
-          console.error('Refresh event stream error', event);
-          if (!ready.settled) {
-            ready.reject(event);
-          }
-          if (!completion.settled) {
-            if (!this.refreshError) {
-              this.refreshError = 'Refresh progress connection failed.';
-            }
-            if (this.refreshStatus !== 'success' && this.refreshStatus !== 'error') {
-              this.refreshStatus = 'error';
-            }
-            completion.reject(event);
-          }
-          const stream = event?.target ?? refreshStream;
-          if (stream && stream.readyState === EventSource.CLOSED) {
-            if (this.refreshStatus !== 'success' && this.refreshStatus !== 'error') {
-              this.refreshStatus = 'closed';
-            }
-            disposeRefreshStream();
-          }
-        };
-
-        return { ready: ready.promise, completion: completion.promise };
-      };
-
-      const { ready, completion } = openStream();
+      const { ready, completion } = this._openRefreshStream(userId);
 
       try {
         await ready;
@@ -236,9 +254,13 @@ export const useUserStore = defineStore('user', {
         return;
       }
 
+      let result;
       try {
-        await api.post(`/users/${userId}/refresh`);
-        const result = await completion.catch((error) => {
+        if (trigger) {
+          await api.post(`/users/${userId}/refresh`);
+        }
+
+        result = await completion.catch((error) => {
           if (!this.refreshError) {
             this.refreshError = 'Refresh progress stream was interrupted.';
           }
@@ -247,14 +269,16 @@ export const useUserStore = defineStore('user', {
         });
 
         if (result?.success) {
-          await this.fetchProfile(userId);
+          await this.fetchProfile(userId, { skipStatusCheck: true });
         } else if (result?.event?.message) {
           this.profileError = result.event.message;
         }
       } catch (error) {
-        this.profileError = handleApiError(error);
-        this.refreshStatus = 'error';
-        this.refreshError = this.profileError;
+        if (trigger) {
+          this.profileError = handleApiError(error);
+          this.refreshStatus = 'error';
+          this.refreshError = this.profileError;
+        }
         completion.catch(() => {});
       } finally {
         disposeRefreshStream();
@@ -262,6 +286,39 @@ export const useUserStore = defineStore('user', {
         if (this.refreshStatus === 'warning') {
           this.refreshStatus = 'running';
         }
+      }
+
+      return result;
+    },
+    async checkRefreshStatus(userId = this.selectedUserId) {
+      if (!userId) {
+        return;
+      }
+
+      try {
+        const { data } = await api.get(`/users/${userId}/refresh/status`);
+        const { active = false, last_event: lastEvent = null } = data || {};
+
+        this.refreshEvents = [];
+        this.refreshError = '';
+
+        if (lastEvent) {
+          this._handleRefreshEvent(lastEvent);
+        } else if (!active) {
+          this.refreshStatus = 'idle';
+        }
+
+        if (active) {
+          this.refreshing = false;
+          const resumePromise = this.refreshUser(userId, { trigger: false, resetEvents: false });
+          resumePromise.catch((error) => {
+            console.error('Failed to resume refresh stream', error);
+          });
+        } else {
+          this.refreshing = false;
+        }
+      } catch (error) {
+        console.warn('Failed to check refresh status', error);
       }
     },
     reset() {

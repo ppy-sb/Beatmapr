@@ -1,6 +1,6 @@
 # Beatmapr
 
-Beatmapr is a two-part project (FastAPI backend + Vue 3 frontend) that indexes osu! packs and users while exposing leaderboards and metadata.
+Beatmapr is a two-part project (FastAPI backend + Vue 3 frontend) that indexes osu! song packs with users while exposing leaderboards and metadata.
 
 ## Table of contents
 
@@ -52,16 +52,10 @@ Install dependencies with Poetry:
 poetry install
 ```
 
-Run the development server with auto-reload:
+Run the development server locally:
 
 ```powershell
-poetry run uvicorn beatmapr.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-Alternatively, run uvicorn directly from an activated environment:
-
-```powershell
-python -m uvicorn beatmapr.main:app --reload --host 127.0.0.1 --port 8000
+poetry run uvicorn beatmapr.main:app --host 127.0.0.1 --port 8000
 ```
 
 FastAPI exposes interactive API docs while the server is running:

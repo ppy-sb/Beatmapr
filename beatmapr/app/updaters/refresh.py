@@ -59,11 +59,14 @@ class RefreshProgressBroker:
         self._subscribers: dict[int, set[asyncio.Queue[RefreshProgressEvent]]] = defaultdict(set)
         self._latest_event: dict[int, RefreshProgressEvent] = {}
         self._lock = asyncio.Lock()
+        self._active: set[int] = set()
 
     async def publish(self, event: RefreshProgressEvent) -> None:
         async with self._lock:
             queues = list(self._subscribers.get(event.user_id, ()))
             self._latest_event[event.user_id] = event
+            if event.stage == "refresh:complete" or event.stage == "refresh:error" or event.status == "error":
+                self._active.discard(event.user_id)
         for queue in queues:
             await queue.put(event)
 
@@ -71,9 +74,14 @@ class RefreshProgressBroker:
         async with self._lock:
             return self._latest_event.get(user_id)
 
+    async def is_active(self, user_id: int) -> bool:
+        async with self._lock:
+            return user_id in self._active
+
     async def reset(self, user_id: int) -> None:
         async with self._lock:
             self._latest_event.pop(user_id, None)
+            self._active.add(user_id)
 
     async def _add_subscriber(self, user_id: int, queue: asyncio.Queue[RefreshProgressEvent]) -> RefreshProgressEvent | None:
         async with self._lock:
@@ -203,13 +211,6 @@ class UserDataRefresher:
             payload = response.json()
             page_scores = payload.get("scores") or []
             scores.extend(page_scores)
-            await self._emit(
-                "scores:page_complete",
-                f"Completed fetching page {page}",
-                page=page,
-                count=len(page_scores),
-                total=len(scores),
-            )
 
             if not page_scores or len(page_scores) < SCORES_PAGE_LIMIT:
                 break

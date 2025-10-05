@@ -11,7 +11,16 @@ from sqlalchemy.orm import Session
 
 from beatmapr.app.database import get_db
 from beatmapr.app.models import Pack, PackBeatmap, User, UserScore
-from beatmapr.app.schemas import PackProgress, RankCounts, SearchUserItem, TotalsSummary, UserProfileResponse, UserSummary
+from beatmapr.app.schemas import (
+    PackProgress,
+    RankCounts,
+    RefreshProgressEventPayload,
+    RefreshStatusResponse,
+    SearchUserItem,
+    TotalsSummary,
+    UserProfileResponse,
+    UserSummary,
+)
 from beatmapr.app.updaters.refresh import RefreshProgressBroker, UserDataRefresher
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -39,6 +48,30 @@ async def refresh_user(user_id: int, db: Session = Depends(get_db)) -> RankCount
     refresher = UserDataRefresher(db, user_id, broker=progress_broker)
     counts = await refresher.run()
     return RankCounts(**{k: counts.get(k, 0) for k in ["SSH", "SS", "SH", "S", "A", "B", "C", "D"]})
+
+
+@router.get("/{user_id}/refresh/status", response_model=RefreshStatusResponse)
+async def get_refresh_status(user_id: int) -> RefreshStatusResponse:
+    event = await progress_broker.last_event(user_id)
+    active = await progress_broker.is_active(user_id)
+
+    if event is None:
+        return RefreshStatusResponse(active=active)
+
+    if not active and event.stage not in {"refresh:complete", "refresh:error"} and event.status not in {"success", "error"}:
+        active = True
+
+    payload = RefreshProgressEventPayload(
+        user_id=event.user_id,
+        stage=event.stage,
+        message=event.message,
+        status=event.status,
+        sequence=event.sequence,
+        payload=event.payload,
+        timestamp=event.timestamp,
+    )
+
+    return RefreshStatusResponse(active=active, last_event=payload)
 
 
 @router.get("/{user_id}/refresh/stream")
