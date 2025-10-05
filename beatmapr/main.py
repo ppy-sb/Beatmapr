@@ -13,9 +13,14 @@ settings = get_settings()
 
 app = FastAPI(title="Beatmapr", version="2.0.0")
 
+# Configure CORS origins based on settings
+cors_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if hasattr(settings, 'frontend_origin') and settings.frontend_origin:
+    cors_origins.append(settings.frontend_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     osu_client_secret: str | None = None
     akatsuki_base_url: str = "https://akatsuki.gg/api/v1"
     request_timeout_seconds: float = 15.0
+    frontend_origin: str | None = None
 
 
 @lru_cache(maxsize=1)
