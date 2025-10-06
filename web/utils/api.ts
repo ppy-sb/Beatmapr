@@ -1,16 +1,14 @@
-import axios from 'axios';
-
-// Use environment variable for API base URL, fallback to localhost for development
 const getApiBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 };
 
-export const api = axios.create({
+export const api = $fetch.create({
   baseURL: getApiBaseUrl(),
-});
+})
+
 
 const normaliseBaseUrl = () => {
-  const configured = api.defaults.baseURL || '';
+  const configured = getApiBaseUrl() || '';
   return configured.replace(/\/?$/, '');
 };
 
@@ -21,7 +19,7 @@ const resolveBrowserOrigin = () => {
   return `${window.location.protocol}//${window.location.host}`;
 };
 
-export const buildEventStreamUrl = (path) => {
+export const buildEventStreamUrl = (path: string) => {
   const normalisedPath = path.startsWith('/') ? path : `/${path}`;
   const base = normaliseBaseUrl();
 
@@ -38,7 +36,7 @@ export const buildEventStreamUrl = (path) => {
   return `${trimmedOrigin}${normalisedPath}`;
 };
 
-export const handleApiError = (error) => {
+export const handleApiError = (error: any) => {
   if (error.response) {
     return error.response.data?.detail || `Request failed: ${error.response.status}`;
   }

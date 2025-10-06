@@ -1,4 +1,5 @@
 <template>
+  <!-- content from src/views/HomeView.vue -->
   <div class="page-wrapper">
     <NavBar>
       <form class="search-form" @submit.prevent="onSubmit">
@@ -35,7 +36,7 @@
 
     <HoverTooltip :visible="tooltip.visible" :position="tooltip.position">
       <template v-if="tooltip.pack">
-        {{ tooltip.pack.slug }} · {{ tooltip.pack.name }}<br />
+        {{ tooltip.pack.slug }}  {{ tooltip.pack.name }}<br />
         Completion: {{ tooltip.pack.cleared }} / {{ tooltip.pack.total }} ({{ formatPercent(tooltip.pack.completion)
         }}%)
       </template>
@@ -43,25 +44,20 @@
 
     <PackModal :visible="modal.visible" :pack="modal.data" @close="closeModal" />
 
-    <!-- <LoadingOverlay :visible="isLoading" message="Loading data..." /> -->
-
     <SiteFooter />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import defaultAvatar from '~/assets/images/default.png';
 
-import HoverTooltip from '@/components/HoverTooltip.vue';
-import LoadingOverlay from '@/components/LoadingOverlay.vue';
-import NavBar from '@/components/NavBar.vue';
-import PackGrid from '@/components/PackGrid.vue';
-import PackModal from '@/components/PackModal.vue';
-import ProfileBanner from '@/components/ProfileBanner.vue';
-import SiteFooter from '@/components/SiteFooter.vue';
-import { usePacksStore } from '@/stores/packs';
-import { useUserStore } from '@/stores/user';
-import { handleApiError } from '@/utils/api';
+import { usePacksStore } from '~/stores/packs';
+import { useUserStore } from '~/stores/user';
+import { handleApiError } from '~/utils/api';
+
+definePageMeta({
+  alias: '/home'
+})
 
 const packsStore = usePacksStore();
 const userStore = useUserStore();
@@ -92,19 +88,15 @@ const isLoading = computed(() => userStore.loadingProfile || userStore.refreshin
 
 const avatarFor = (id) => `https://a.akatsuki.gg/${id}.png`;
 
-const getDefaultAvatarUrl = () => {
-  return new URL(`../assets/images/default.png`, import.meta.url).href;
-};
-
 const onSuggestionImageError = (event) => {
-  event.target.src = getDefaultAvatarUrl();
+  event.target.src = defaultAvatar
 };
 
 const refreshStatusHints = {
-  connecting: 'Connecting to refresh stream…',
-  listening: 'Waiting for refresh to start…',
-  running: 'Refreshing player data…',
-  warning: 'Retrying refresh request…',
+  connecting: 'Connecting to refresh stream\u2026',
+  listening: 'Waiting for refresh to start\u2026',
+  running: 'Refreshing player data\u2026',
+  warning: 'Retrying refresh request\u2026',
   closed: 'Progress stream closed.',
 };
 
@@ -217,7 +209,7 @@ const onSubmit = async () => {
   const suggestion = suggestions.value.find((item) =>
     item.username.toLowerCase() === trimmed.toLowerCase()
   );
-  const userId = trimmed.match(/^\d+$/) ? Number(trimmed) : suggestion?.id;
+  const userId = trimmed.match(/^\\d+$/) ? Number(trimmed) : suggestion?.id;
 
   if (!userId) {
     statusMessage.value = 'Player not found, please select from suggestions.';

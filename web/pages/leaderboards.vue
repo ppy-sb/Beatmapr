@@ -51,12 +51,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-
-import LoadingOverlay from '@/components/LoadingOverlay.vue';
-import NavBar from '@/components/NavBar.vue';
-import SiteFooter from '@/components/SiteFooter.vue';
-import { api, handleApiError } from '@/utils/api';
+import { api, handleApiError } from '~/utils/api';
 
 const entries = ref([]);
 const page = ref(1);
@@ -69,7 +64,7 @@ const fetchLeaderboard = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    const { data } = await api.get('/leaderboard', {
+    const data = await api('/leaderboard', {
       params: { page: page.value, page_size: pageSize.value },
     });
     entries.value = data.results;

@@ -37,7 +37,15 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import fallbackAvatar from '~/assets/images/default.png';
+import SSH from '~/assets/images/SSH.svg';
+import SS from '~/assets/images/SS.svg';
+import SH from '~/assets/images/SH.svg';
+import S from '~/assets/images/S.svg';
+import A from '~/assets/images/A.svg';
+import B from '~/assets/images/B.svg';
+import C from '~/assets/images/C.svg';
+import D from '~/assets/images/D.svg';
 
 const props = defineProps({
   profile: {
@@ -65,7 +73,6 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh']);
 
-const fallbackAvatar = new URL('../assets/images/default.png', import.meta.url).href;
 const avatarSrcState = ref(null);
 
 const avatarSrc = computed(() => {
@@ -87,7 +94,19 @@ const formattedGlobalRank = computed(() => {
   return rank ? `#${rank.toLocaleString()}` : '#?';
 });
 
-const iconFor = (rank) => new URL(`../assets/images/${rank}.svg`, import.meta.url).href;
+const url = {
+  SSH,
+  SS,
+  SH,
+  S,
+  A,
+  B,
+  C,
+  D
+}
+
+
+const iconFor = (rank) => url[rank] || '';
 
 const onAvatarError = () => {
   avatarSrcState.value = fallbackAvatar;

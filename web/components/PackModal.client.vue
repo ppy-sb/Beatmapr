@@ -37,8 +37,6 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
-
 const props = defineProps({
   visible: Boolean,
   pack: {
@@ -53,7 +51,7 @@ const audioRef = ref(new Audio());
 const copiedId = ref(null);
 const currentPreviewId = ref(null);
 
-const audio = computed(() => audioRef.value);
+const audio = audioRef
 
 watch(
   () => props.visible,

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { api, handleApiError } from '@/utils/api';
+import { api, handleApiError } from '~/utils/api';
 
 export const usePacksStore = defineStore('packs', {
   state: () => ({
@@ -10,7 +10,7 @@ export const usePacksStore = defineStore('packs', {
     summaryLoaded: false,
     loading: false,
     error: '',
-    detailCache: {},
+    detailCache: {} as Record<string, any>,
   }),
   actions: {
     async fetchSummary(force = false) {
@@ -20,7 +20,7 @@ export const usePacksStore = defineStore('packs', {
       this.loading = true;
       this.error = '';
       try {
-        const { data } = await api.get('/packs/summary');
+        const data = await api('/packs/summary');
         this.summary.standard = data.standard || [];
         this.summary.other = data.other || [];
         this.summaryLoaded = true;
@@ -30,13 +30,13 @@ export const usePacksStore = defineStore('packs', {
         this.loading = false;
       }
     },
-    async fetchPackDetail(packId, userId = null, force = false) {
+    async fetchPackDetail(packId: string, userId = null, force = false) {
       const cacheKey = `${packId}:${userId ?? 'none'}`;
       if (!force && this.detailCache[cacheKey]) {
         return this.detailCache[cacheKey];
       }
       try {
-        const { data } = await api.get(`/packs/${packId}`, {
+        const data = await api(`/packs/${packId}`, {
           params: userId ? { user_id: userId } : {},
         });
         this.detailCache[cacheKey] = data;

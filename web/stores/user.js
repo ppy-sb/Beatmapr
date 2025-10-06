@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { api, buildEventStreamUrl, handleApiError } from '@/utils/api';
+import { api, buildEventStreamUrl, handleApiError } from '~/utils/api';
 
 const MAX_PROGRESS_EVENTS = 40;
 
@@ -75,7 +75,7 @@ export const useUserStore = defineStore('user', {
       this.searchLoading = true;
       this.searchError = '';
       try {
-        const { data } = await api.get('/users/search', {
+        const data = await api('/users/search', {
           params: { query: keyword, limit: 10 },
         });
         this.searchResults = data;
@@ -98,7 +98,7 @@ export const useUserStore = defineStore('user', {
       this.loadingProfile = true;
       this.profileError = '';
       try {
-        const { data } = await api.get(`/users/${userId}/profile`);
+        const data = await api(`/users/${userId}/profile`);
         this.profile = data;
         this.selectedUserId = userId;
       } catch (error) {
@@ -249,7 +249,7 @@ export const useUserStore = defineStore('user', {
         this.refreshError = 'Unable to connect to refresh progress stream.';
         this.refreshStatus = 'error';
         this.refreshing = false;
-        completion.catch(() => {});
+        completion.catch(() => { });
         disposeRefreshStream();
         return;
       }
@@ -257,7 +257,7 @@ export const useUserStore = defineStore('user', {
       let result;
       try {
         if (trigger) {
-          await api.post(`/users/${userId}/refresh`);
+          await api(`/users/${userId}/refresh`, { method: 'POST' });
         }
 
         result = await completion.catch((error) => {
@@ -279,7 +279,7 @@ export const useUserStore = defineStore('user', {
           this.refreshStatus = 'error';
           this.refreshError = this.profileError;
         }
-        completion.catch(() => {});
+        completion.catch(() => { });
       } finally {
         disposeRefreshStream();
         this.refreshing = false;
@@ -296,7 +296,7 @@ export const useUserStore = defineStore('user', {
       }
 
       try {
-        const { data } = await api.get(`/users/${userId}/refresh/status`);
+        const data = await api(`/users/${userId}/refresh/status`);
         const { active = false, last_event: lastEvent = null } = data || {};
 
         this.refreshEvents = [];
