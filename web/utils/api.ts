@@ -1,39 +1,13 @@
-const getApiBaseUrl = () => {
-  return import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
-};
-
+const BASE = '/api';
 export const api = $fetch.create({
-  baseURL: getApiBaseUrl(),
+  baseURL: BASE,
 })
-
-
-const normaliseBaseUrl = () => {
-  const configured = getApiBaseUrl() || '';
-  return configured.replace(/\/?$/, '');
-};
-
-const resolveBrowserOrigin = () => {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-  return `${window.location.protocol}//${window.location.host}`;
-};
 
 export const buildEventStreamUrl = (path: string) => {
   const normalisedPath = path.startsWith('/') ? path : `/${path}`;
-  const base = normaliseBaseUrl();
 
-  if (base.startsWith('http')) {
-    return `${base}${normalisedPath}`;
-  }
+  return `${BASE}${normalisedPath}`;
 
-  const origin = resolveBrowserOrigin();
-  if (!origin) {
-    return normalisedPath;
-  }
-
-  const trimmedOrigin = origin.replace(/\/?$/, '');
-  return `${trimmedOrigin}${normalisedPath}`;
 };
 
 export const handleApiError = (error: any) => {

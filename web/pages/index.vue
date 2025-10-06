@@ -24,7 +24,7 @@
         :progress="userStore.refreshEvents" :progress-status="userStore.refreshStatus"
         :refresh-error="userStore.refreshError" @refresh="userStore.refreshUser" />
 
-      <div class="grid-section" v-if="packsLoaded">
+      <div class="grid-section" v-if="showPacks">
         <PackGrid title="Standard Packs" :packs="userStore.profile?.standard || []" @hover="showTooltip"
           @leave="hideTooltip" @open="openPack" />
 
@@ -82,7 +82,7 @@ const modal = reactive({
 
 const suggestions = computed(() => userStore.searchResults);
 
-const packsLoaded = computed(() => Boolean(userStore.profile?.standard?.length || userStore.profile?.other?.length));
+const showPacks = computed(() => Boolean(userStore.profile?.standard?.length || userStore.profile?.other?.length));
 
 const isLoading = computed(() => userStore.loadingProfile || userStore.refreshing || modal.loading || packsStore.loading);
 
