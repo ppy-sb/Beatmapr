@@ -418,9 +418,15 @@ def _extract_standard_stats(stats: Any) -> dict[str, Any]:
 
     for candidate in candidates:
         if "std" in candidate and isinstance(candidate["std"], dict):
+            if int(candidate["std"].get("playcount") or 0) == 0:
+                continue
             return candidate["std"]
         if candidate.get("mode") in {"std", "standard", 0}:
+            if int(candidate.get("playcount") or 0) == 0:
+                continue
             return candidate
         if candidate.get("ruleset") in {"osu"}:
+            if int(candidate.get("playcount") or 0) == 0:
+                continue
             return candidate
     return candidates[0] if candidates else {}
