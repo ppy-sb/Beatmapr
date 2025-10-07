@@ -20,9 +20,10 @@
   </main>
 </template>
 
-<script setup>
-import NavBar from '../components/NavBar.vue'
-// ...existing code...
+<script setup lang="ts">
+definePageMeta({
+  title: 'Beatmapr - Track your relax scores and beatmap pack progress',
+})
 </script>
 
 <style scoped>
