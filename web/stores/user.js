@@ -67,6 +67,16 @@ export const useUserStore = defineStore('user', {
     },
   },
   actions: {
+    /**
+     * Searches for users based on a keyword.
+     * @async
+     * @param {string} keyword - The search term to find users
+     * @returns {Promise<{id: string}[]>} - Updates searchResults state with found users
+     * @throws {Error} Sets searchError state if API request fails
+     * @description When keyword is empty, clears search results.
+     * Sets searchLoading state during API request.
+     * Limits results to 10 users.
+     */
     async searchUsers(keyword) {
       if (!keyword) {
         this.searchResults = [];
@@ -89,6 +99,14 @@ export const useUserStore = defineStore('user', {
       this.searchResults = [];
       this.searchError = '';
     },
+    /**
+     * Fetches and sets the user profile for a given user ID
+     * @param {string|number} userId - The ID of the user whose profile to fetch
+     * @param {Object} [options={}] - Optional configuration object
+     * @param {boolean} [options.skipStatusCheck=false] - If true, skips checking refresh status after fetching profile
+     * @returns {Promise<Object|null>} The fetched user profile data or null if there was an error
+     * @throws {string} Sets profileError if the API call fails
+     */
     async fetchProfile(userId, options = {}) {
       const { skipStatusCheck = false } = options;
       if (!userId) {
@@ -111,6 +129,7 @@ export const useUserStore = defineStore('user', {
       if (!skipStatusCheck && !this.profileError) {
         await this.checkRefreshStatus(userId);
       }
+      return this.profile
     },
     _handleRefreshEvent(payload) {
       if (!payload || typeof payload !== 'object') {
@@ -221,6 +240,16 @@ export const useUserStore = defineStore('user', {
 
       return { ready: ready.promise, completion: completion.promise };
     },
+
+    
+    /**
+     * Description placeholder
+     *
+     * @async
+     * @param {*} [userId=this.selectedUserId] 
+     * @param {{ trigger?: boolean; resetEvents?: boolean; }} [options={}] 
+     * @returns {unknown} 
+     */
     async refreshUser(userId = this.selectedUserId, options = {}) {
       const { trigger = true, resetEvents = trigger } = options;
       if (!userId) {
