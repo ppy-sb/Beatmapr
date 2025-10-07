@@ -129,12 +129,6 @@ watch(
     }
 );
 
-onMounted(async () => {
-    if (!packsStore.summaryLoaded) {
-        await packsStore.fetchSummary();
-    }
-});
-
 onUnmounted(() => {
     clearTimeout(refreshSuccessTimer);
     userStore.closeRefreshStream();
@@ -197,5 +191,17 @@ const formatPercent = (fraction) => {
     return (fraction * 100).toFixed(2);
 };
 
-await userStore.fetchProfile(router.currentRoute.value.params.id)
+await callOnce(async () => {
+    await packsStore.fetchSummary();
+    await userStore.fetchProfile(router.currentRoute.value.params.id)
+});
+
+watch(
+    () => router.currentRoute.value.params.id,
+    async (newId, oldId) => {
+        if (newId !== oldId) {
+            await userStore.fetchProfile(newId);
+        }
+    }
+);
 </script>
