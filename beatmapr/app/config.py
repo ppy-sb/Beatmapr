@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     akatsuki_base_url: str = "https://akatsuki.gg/api/v1"
     request_timeout_seconds: float = 15.0
     frontend_origin: str | None = None
+    bind_host: str = "127.0.0.1"
+    bind_port: int = 8000
 
 
 @lru_cache(maxsize=1)
