@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from beatmapr.app.config import get_settings
 from beatmapr.app.database import SessionLocal
-from beatmapr.app.logging import log
+from beatmapr.app.logging import Ansi, log
 from beatmapr.app.models import Beatmap, Pack, PackBeatmap
 
 from .common import PACK_BATCH_SIZE, discover_json_files, parse_datetime, safe_float, safe_int
@@ -56,14 +56,32 @@ class PackUpdater:
     def __init__(self, session_factory: type[Session] | Any = SessionLocal) -> None:
         self._session_factory = session_factory
 
-    def update_standard(self, batch_size: int = PACK_BATCH_SIZE) -> PackUpdateSummary:
+    # determine the next standard pack index by finding the largest numeric
+    # suffix of existing standard pack slugs (format: <letter><number>, e.g. S123)
+    def find_largest_index(self, type: str = "standard", prefix: str = "S") -> int:
+        start_index = 1
+        with self._session_factory() as session:  # type: ignore[call-arg]
+            rows = session.scalars(select(Pack.slug).where(Pack.pack_type == type, Pack.slug.like(f"{prefix}%")))
+            max_idx = 0
+            for slug in rows:
+                try:
+                    num = int(str(slug)[1:])
+                except Exception:
+                    continue
+                if num > max_idx:
+                    max_idx = num
+
+            if max_idx >= 1:
+                start_index = max_idx + 1
+        return start_index
+
+    def update_standard(self, batch_size: int = PACK_BATCH_SIZE, tag_index: int = 1) -> PackUpdateSummary:
         client = _ensure_osu_client()
 
-        log(f"Starting standard pack update (batch size={batch_size})")
+        log(f"Starting standard pack update (batch size={batch_size}, tag_index={tag_index})", Ansi.LGREEN)
 
         summary = PackUpdateSummary()
         pending: list[dict[str, Any]] = []
-        tag_index = 1
         batch_index = 1
 
         while True:
@@ -78,7 +96,7 @@ class PackUpdater:
             pending.append({**payload, "pack_type": "standard", "category": "standard"})
 
             if len(pending) >= batch_size:
-                batch_summary = self._persist_pack_batch(pending, f"standard-{batch_index}")
+                batch_summary = self._persist_pack_batch(pending, f"batch-{batch_index}")
                 summary.accumulate(batch_summary)
                 pending.clear()
                 batch_index += 1
@@ -86,10 +104,10 @@ class PackUpdater:
             tag_index += 1
 
         if pending:
-            batch_summary = self._persist_pack_batch(pending, f"standard-{batch_index}")
+            batch_summary = self._persist_pack_batch(pending, f"batch-{batch_index}")
             summary.accumulate(batch_summary)
 
-        log(f"Standard pack update complete; {summary.processed} packs processed")
+        log(f"Standard pack update complete; {summary.processed} packs processed", Ansi.LGREEN)
         return summary
 
     def update_other(self, batch_size: int = PACK_BATCH_SIZE) -> PackUpdateSummary:
@@ -231,6 +249,8 @@ class PackUpdater:
         pack = client.beatmap_pack(pack_tag)
         beatmaps: list[dict[str, Any]] = []
 
+        log(f"Fetching pack '{pack_tag}' data from osu! API ({len(getattr(pack, 'beatmapsets', []) or [])} beatmapsets)")
+
         for beatmapset in getattr(pack, "beatmapsets", []) or []:
             set_data = client.beatmapset(beatmapset.id)
             for beatmap in getattr(set_data, "beatmaps", []) or []:
@@ -304,7 +324,7 @@ class PackUpdater:
                 logger.exception("Failed to persist pack batch %s; rolled back", batch_label)
                 raise
             else:
-                log(f"Completed pack batch {batch_label}, {summary.processed} packs committed")
+                log(f"Completed {batch_label}, {summary.processed} packs committed", Ansi.LYELLOW)
 
         return summary
 

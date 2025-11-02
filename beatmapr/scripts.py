@@ -6,7 +6,11 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from sqlalchemy import select
 
+from beatmapr.app.database import SessionLocal
+from beatmapr.app.logging import log
+from beatmapr.app.models import Pack
 from beatmapr.app.updaters import (
     PACK_BATCH_SIZE,
     USERS_BATCH_SIZE,
@@ -29,12 +33,13 @@ app.add_typer(user_app, name="users")
 @pack_app.command("update", help="Update pack data from osu! official API")
 def update_packs(
     batch_size: int = typer.Option(PACK_BATCH_SIZE, min=1, help="Number of packs to commit to the database per batch"),
-    include_other: bool = typer.Option(True, help="Sync packs from other categories"),
+    include_other: bool = typer.Option(False, help="Sync packs from other categories"),
 ) -> None:
     updater = PackUpdater()
 
     try:
-        standard_summary = updater.update_standard(batch_size=batch_size)
+        tag_idx = updater.find_largest_index()
+        standard_summary = updater.update_standard(batch_size=batch_size, tag_index=tag_idx)
         _print_pack_summary("Standard Packs", standard_summary)
 
         if include_other:
