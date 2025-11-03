@@ -429,4 +429,4 @@ def _extract_standard_stats(stats: Any) -> dict[str, Any]:
             if int(candidate.get("playcount") or 0) == 0:
                 continue
             return candidate
-    return candidates[0] if candidates else {}
+    return candidates[1] if candidates else {}
