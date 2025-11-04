@@ -42,6 +42,7 @@ const route = useRoute('users-id');
 const packsStore = usePacksStore();
 const userStore = useUserStore();
 const uP = useUserProfile(userStore);
+const { transaction: withLoadingOverlay } = useLoadingOverlay();
 
 const statusMessage = ref('');
 let refreshSuccessTimer: string | number | NodeJS.Timeout | undefined = undefined;
@@ -193,13 +194,11 @@ function formatPercent(fraction: number) {
     return (fraction * 100).toFixed(2);
 }
 
-await callOnce(async () => {
-
+async function init() {
     if (!route.params.id) {
         statusMessage.value = 'Please select a player to view progress.';
         return;
     }
-
     await Promise.all([
         await packsStore.fetchSummary(),
 
@@ -208,6 +207,17 @@ await callOnce(async () => {
         //     : await userStore.fetchProfile(route.params.id.toString()),
         await uP.getProfileByHandle(route.params.id.toString())
     ])
+}
+
+await callOnce(async () => {
+
+    if (import.meta.server) {
+        await init();
+        return;
+    } else {
+
+        await withLoadingOverlay(init, 'Loading user profile and packs...')
+    }
 
 }, { mode: 'navigation' });
 </script>
