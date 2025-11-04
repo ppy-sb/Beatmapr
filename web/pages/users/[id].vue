@@ -1,38 +1,38 @@
 <template>
-
-    <div>
-        <NavBar />
-        <div class="page-wrapper">
-            <main class="content-area">
-                <p v-if="statusMessage" class="status-message">{{ statusMessage }}</p>
-                <ProfileBanner :profile="userStore.profile" :counts="userStore.rankCounts"
-                    :refreshing="userStore.refreshing" :progress="userStore.refreshEvents"
-                    :progress-status="userStore.refreshStatus" :refresh-error="userStore.refreshError"
-                    @refresh="userStore.refreshUser" />
-                <div class="grid-section" v-if="showPacks">
-                    <PackGrid title="Standard Packs" :packs="userStore.profile?.standard || []" @hover="showTooltip"
-                        @leave="hideTooltip" @open="openPack" />
-                    <PackGrid title="Other Packs" :packs="userStore.profile?.other || []" @hover="showTooltip"
-                        @leave="hideTooltip" @open="openPack" />
-                </div>
-                <p v-else class="status-message">Please select a player to view progress.</p>
-            </main>
-            <HoverTooltip :visible="tooltip.visible" :position="tooltip.position">
-                <template v-if="tooltip.pack">
-                    {{ tooltip.pack.slug }}  {{ tooltip.pack.name }}<br />
-                    Completion: {{ tooltip.pack.cleared }} / {{ tooltip.pack.total }} ({{
-                        formatPercent(tooltip.pack.completion)
-                    }}%)
-                </template>
-            </HoverTooltip>
-            <PackModal :visible="modal.visible" :pack="modal.data" @close="closeModal" />
-            <SiteFooter />
+    <div class="w">
+        <div class="sm-container">
+            <p :class="{
+                visible: statusMessage !== 'Refresh complete.' && !!statusMessage
+            }" class="status-message">
+                {{ statusMessage || '　' }}
+            </p>
         </div>
+        <main class="content-area">
+            <ProfileBanner :profile="userStore.profile" :counts="userStore.rankCounts"
+                :refreshing="userStore.refreshing" :progress="userStore.refreshEvents"
+                :progress-status="userStore.refreshStatus" :refresh-error="userStore.refreshError"
+                @refresh="userStore.refreshUser" />
+            <div class="grid-section" v-if="showPacks">
+                <PackGrid title="Standard Packs" :packs="userStore.profile?.standard || []" @hover="showTooltip"
+                    @leave="hideTooltip" @open="openPack" />
+                <PackGrid title="Other Packs" :packs="userStore.profile?.other || []" @hover="showTooltip"
+                    @leave="hideTooltip" @open="openPack" />
+            </div>
+            <p v-else class="status-message">Please select a player to view progress.</p>
+        </main>
+        <HoverTooltip :visible="tooltip.visible" :position="tooltip.position">
+            <template v-if="tooltip.pack">
+                {{ tooltip.pack.slug }}  {{ tooltip.pack.name }}<br />
+                Completion: {{ tooltip.pack.cleared }} / {{ tooltip.pack.total }} ({{
+                    formatPercent(tooltip.pack.completion)
+                }}%)
+            </template>
+        </HoverTooltip>
+        <PackModal :visible="modal.visible" :pack="modal.data" @close="closeModal" />
     </div>
 </template>
 
 <script setup lang="ts">
-import NavBar from '~/components/NavBar.vue';
 import { usePacksStore } from '~/stores/packs';
 import { useUserStore } from '~/stores/user';
 import { handleApiError } from '~/utils/api';
@@ -207,3 +207,44 @@ await callOnce(async () => {
 
 }, { mode: 'navigation' });
 </script>
+
+<style scoped>
+.w {
+    max-width: 1100px;
+    width: 100%;
+    align-self: center;
+}
+
+
+.sm-container {
+    overflow: hidden;
+}
+
+.status-message {
+    /* from visible to invisible */
+    transition-property: opacity, margin, padding;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+
+    opacity: 0;
+    content-visibility: hidden;
+    margin: 0;
+    margin-top: -100%;
+    padding: 0;
+}
+
+.status-message:not(.visible) {
+    transition-delay: 2s;
+}
+
+.status-message.visible {
+    /* from invisible to visible */
+    transition-timing-function: ease;
+    transition-delay: 0s;
+
+    opacity: 1;
+    content-visibility: visible;
+    margin-top: 0;
+    padding-top: 1em;
+}
+</style>

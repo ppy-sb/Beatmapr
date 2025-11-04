@@ -1,36 +1,39 @@
 <template>
   <section class="profile-section">
     <div class="profile-container">
-      <img :src="avatarSrc" alt="Player Avatar" class="profile-avatar" @error="onAvatarError" />
-      <div class="profile-info">
-        <h2>{{ profile?.user?.username || 'Player' }}</h2>
-        <p>Ranked Score: {{ formattedRankedScore }}</p>
-        <p>Global Rank: {{ formattedGlobalRank }}</p>
-        <div class="rank-counts">
-          <div v-for="rank in rankOrder" :key="rank" class="rank-count">
-            <img :src="iconFor(rank)" :alt="rank" />
-            <span>{{ counts[rank] ?? 0 }}</span>
+      <div class="pf-resp">
+        <img :src="avatarSrc" alt="Player Avatar" class="profile-avatar" @error="onAvatarError" />
+        <div class="profile-info">
+          <h2>{{ profile?.user?.username || 'Player' }}</h2>
+          <p>Ranked Score: {{ formattedRankedScore }}</p>
+          <p>Global Rank: {{ formattedGlobalRank }}</p>
+          <div class="rank-counts">
+            <div v-for="rank in rankOrder" :key="rank" class="rank-count">
+              <img :src="iconFor(rank)" :alt="rank" />
+              <span>{{ counts[rank] ?? 0 }}</span>
+            </div>
           </div>
-        </div>
-        <div class="profile-actions">
-          <button class="refresh-button" type="button" @click="emit('refresh')" :disabled="refreshing">
-            <span v-if="refreshing" class="button-spinner" />
-            {{ refreshing ? 'Refreshing…' : 'Refresh Data' }}
-          </button>
           <span v-if="profile?.user?.last_refreshed_at" class="last-updated">
             Last updated: {{ formatDate(profile.user.last_refreshed_at) }}
           </span>
-          <div v-if="refreshing || renderedProgress.length" class="refresh-status">
-            <p v-if="statusText" class="status-text" :class="statusClass">{{ statusText }}</p>
-            <ul v-if="renderedProgress.length" class="progress-log">
-              <li v-for="event in renderedProgress" :key="event.sequence">
-                <span class="time">{{ event.timeText }}</span>
-                <span class="stage" :class="event.statusClass">{{ event.stageLabel }}</span>
-                <span class="message" :class="event.statusClass">{{ event.message }}</span>
-              </li>
-            </ul>
-          </div>
         </div>
+      </div>
+      <div class="profile-actions" :class="{ last: !refreshing && !renderedProgress.length }">
+        <button class="refresh-button" style="margin-left: auto;" type="button" @click="emit('refresh')"
+          :disabled="refreshing">
+          <span v-if="refreshing" class="button-spinner" />
+          {{ refreshing ? 'Refreshing…' : 'Refresh Data' }}
+        </button>
+      </div>
+      <div v-if="refreshing || renderedProgress.length" class="refresh-status">
+        <p v-if="statusText" class="status-text" :class="statusClass">{{ statusText }}</p>
+        <ul v-if="renderedProgress.length" class="progress-log">
+          <li v-for="event in renderedProgress" :key="event.sequence">
+            <span class="time">{{ event.timeText }}</span>
+            <span class="stage" :class="event.statusClass">{{ event.stageLabel }}</span>
+            <span class="message" :class="event.statusClass">{{ event.message }}</span>
+          </li>
+        </ul>
       </div>
     </div>
   </section>
@@ -216,8 +219,8 @@ const statusClass = computed(() => {
   flex-direction: column;
   gap: 0.45rem;
   background-color: rgba(17, 17, 17, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
+  /* border: 1px solid rgba(255, 255, 255, 0.08); */
+  border-radius: 0 0 20px 20px;
   padding: 0.75rem 1rem;
 }
 
@@ -303,4 +306,18 @@ const statusClass = computed(() => {
 .status-muted {
   color: #bdbdbd;
 }
+
+
+/* .profile-actions,
+.profile-actions>button {
+  transition: border-radius 0.1s ease;
+}
+
+.profile-actions.last {
+  border-radius: 0 0 20px 20px;
+
+  &>button {
+    border-radius: 0 0 20px;
+  }
+} */
 </style>

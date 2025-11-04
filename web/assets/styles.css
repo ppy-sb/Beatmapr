@@ -40,7 +40,6 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   position: sticky;
   top: 0;
-  z-index: 1000;
 }
 
 .nav-container {
@@ -90,7 +89,7 @@ body {
   width: 100%;
   padding: 0.6rem 0.75rem;
   border: none;
-  border-radius: 6px 0 0 6px;
+  border-radius: 6px;
   background-color: #3a3a3a;
   color: #e0e0e0;
   font-size: 0.95rem;
@@ -127,7 +126,7 @@ body {
   max-height: 260px;
   overflow-y: auto;
   border-radius: 8px;
-  z-index: 1200;
+  z-index: 1300;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
@@ -155,18 +154,18 @@ body {
 /* Profile */
 .profile-section {
   background-color: #2a2a2a;
-  padding: 2rem 0;
+  /* padding: 2rem 0; */
   border-radius: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
 }
 
 .profile-container {
-  max-width: 1100px;
+  /* max-width: 1100px; */
   margin: 0 auto;
-  padding: 0 2rem;
+  /* padding: 0 2rem; */
   display: flex;
-  align-items: center;
-  gap: 2rem;
+  flex-direction: column;
   flex-wrap: wrap;
 }
 
@@ -176,6 +175,13 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #4a90e2;
+  display: inline;
+  vertical-align: middle;
+}
+.profile-info {
+  display: inline-block;
+  margin-left: 1.5rem;
+  vertical-align: middle;
 }
 
 .profile-info h2 {
@@ -192,15 +198,15 @@ body {
 .profile-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
   margin-top: 1rem;
   flex-wrap: wrap;
+  border-top: 1px solid #3a3a3a;
+  background-color: #252525;
 }
 
 .refresh-button {
   padding: 0.6rem 1.2rem;
   border: none;
-  border-radius: 6px;
   background-color: #2196f3;
   color: #fff;
   font-weight: 600;
@@ -233,7 +239,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 1rem;
+  margin-top: .4rem;
   align-items: center;
 }
 
@@ -267,11 +273,12 @@ body {
 
 .packs-header__title {
   margin: 0;
+  margin-bottom: 0.5rem;
 }
 
 .packs-header__subtitle {
-  margin: 0.35rem 0 0;
-  color: #cccccc;
+  margin-bottom: 0.2rem;
+  color: #7f7f7f;
   font-size: 0.95rem;
 }
 
@@ -303,7 +310,7 @@ body {
 /* Tooltip */
 .custom-tooltip {
   position: fixed;
-  z-index: 1500;
+  z-index: 1;
   background: rgba(0, 0, 0, 0.85);
   color: #fff;
   padding: 0.5rem 0.75rem;
@@ -322,7 +329,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1400;
+  z-index: 1;
 }
 
 .modal-content {
@@ -415,13 +422,26 @@ body {
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  z-index: 2000;
+  backdrop-filter: saturate(0.5);
+  
+  opacity: 0;
+  pointer-events: none;
+  transition-property: opacity, backdrop-filter;
+  transition-duration: 0.1s;
+  transition-timing-function: ease;
+}
+
+.loading-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
 }
 
 .loading-spinner {
@@ -493,20 +513,31 @@ body {
 
 /* Footer */
 .site-footer {
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   background-color: #2a2a2a;
   margin-top: auto;
 }
 
 .footer-content {
-  max-width: 1100px;
+  max-width: 720px;
   margin: 0 auto;
-  text-align: center;
+  display: flex;
+  gap: .75em;
+  justify-content: center;
+}
+
+.footer-logo {
+  filter: grayscale(0.7) brightness(0.6);
+  transition: filter 0.3s ease;
+}
+.footer-logo:hover {
+  filter: none;
 }
 
 .footer-note {
   color: #9e9e9e;
   font-size: 0.9rem;
+  margin: 0.25rem 0;
 }
 
 .footer-note a {
@@ -516,6 +547,12 @@ body {
 
 .footer-note a:hover {
   text-decoration: underline;
+}
+
+.pf-resp {
+  padding-top: 2em;
+  padding-left: 2em;
+  padding-right: 2em;
 }
 
 /* Animations */
@@ -538,12 +575,29 @@ body {
 
   .profile-container {
     flex-direction: column;
-    align-items: flex-start;
+  }
+
+  .pf-resp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: stretch;
   }
 
   .profile-avatar {
     width: 90px;
     height: 90px;
+  }
+
+  .profile-info {
+    margin: 0;
+    & > h2, p {
+      text-align: center;
+    }
+  }
+  
+  .rank-counts {
+    justify-content: center;
   }
 
   .squares {

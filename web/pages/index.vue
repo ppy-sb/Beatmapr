@@ -1,5 +1,4 @@
 <template>
-  <NavBar />
   <main class="container">
     <section class="hero">
       <div class="hero-inner">
@@ -44,7 +43,7 @@ definePageMeta({
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   color: var(--text);
   background: var(--bg);
-  min-height: calc(100vh - 56px);
+  /* min-height: calc(100vh - 56px); */
 }
 
 .hero {

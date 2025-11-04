@@ -38,7 +38,10 @@ const disposeRefreshStream = () => {
 export const useUserStore = defineStore('user', {
   state: () => ({
     selectedUserId: null,
-    profile: null,
+    profile: {
+      standard: [],
+      other: [],
+    },
     loadingProfile: false,
     profileError: '',
     refreshing: false,
