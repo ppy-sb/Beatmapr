@@ -20,14 +20,14 @@
             </div>
             <p v-else class="status-message">Please select a player to view progress.</p>
         </main>
-        <HoverTooltip :visible="tooltip.visible" :position="tooltip.position">
+        <hover-tooltip :visible="tooltip.visible" :position="tooltip.position" ref="tt">
             <template v-if="tooltip.pack">
                 {{ tooltip.pack.slug }}  {{ tooltip.pack.name }}<br />
                 Completion: {{ tooltip.pack.cleared }} / {{ tooltip.pack.total }} ({{
                     formatPercent(tooltip.pack.completion)
                 }}%)
             </template>
-        </HoverTooltip>
+        </hover-tooltip>
         <PackModal :visible="modal.visible" :pack="modal.data" @close="closeModal" />
     </div>
 </template>
@@ -36,6 +36,7 @@
 import { usePacksStore } from '~/stores/packs';
 import { useUserStore } from '~/stores/user';
 import { handleApiError } from '~/utils/api';
+import { type HoverTooltip } from '#components';
 
 const route = useRoute('users-id');
 const packsStore = usePacksStore();
@@ -56,6 +57,8 @@ const modal = reactive({
     data: null,
     loading: false,
 });
+
+const tt = useTemplateRef<InstanceType<typeof HoverTooltip>>('tt')
 
 const showPacks = computed(() => !!(userStore.profile?.standard?.length || userStore.profile?.other?.length));
 
@@ -132,13 +135,14 @@ onUnmounted(() => {
     userStore.closeRefreshStream();
 });
 
-function showTooltip({ event, pack }: { event: MouseEvent; pack: any; }) {
+async function showTooltip({ event, pack }: { event: PointerEvent; pack: any; }) {
+    await nextTick();
     tooltip.visible = true;
     tooltip.pack = pack;
 
     const padding = 12;
-    const tooltipWidth = 220;
-    const tooltipHeight = 80;
+    const tooltipWidth = tt.value?.el?.offsetWidth || 0;
+    const tooltipHeight = tt.value?.el?.offsetHeight || 0;
 
     let x = event.pageX + padding;
     let y = event.pageY + padding;
@@ -147,10 +151,10 @@ function showTooltip({ event, pack }: { event: MouseEvent; pack: any; }) {
     const viewportHeight = window.innerHeight;
 
     if (x + tooltipWidth > viewportWidth) {
-        x = event.pageX - tooltipWidth - padding;
+        x = event.pageX - tooltipWidth;
     }
     if (y + tooltipHeight > viewportHeight) {
-        y = event.pageY - tooltipHeight - padding;
+        y = event.pageY - tooltipHeight;
     }
 
     tooltip.position = { x, y };
@@ -158,7 +162,7 @@ function showTooltip({ event, pack }: { event: MouseEvent; pack: any; }) {
 
 function hideTooltip() {
     tooltip.visible = false;
-    tooltip.pack = null;
+    // tooltip.pack = null;
 }
 
 async function openPack(pack: { id: string; }) {
