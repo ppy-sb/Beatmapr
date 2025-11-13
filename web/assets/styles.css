@@ -540,13 +540,19 @@ body {
   margin: 0.25rem 0;
 }
 
+a.link,
 .footer-note a {
   color: #4a90e2;
   text-decoration: none;
 }
 
+a.link:hover
 .footer-note a:hover {
   text-decoration: underline;
+}
+a.link:visited
+.footer-note a:visited {
+  color: #b44ae2;
 }
 
 .pf-resp {

@@ -5,6 +5,8 @@
       <div>
         <p class="footer-note">
           Made by
+          <a href="https://github.com/ppy-sb" target="_blank" rel="noopener noreferrer">ppy.sb</a>
+          &
           <a href="https://akatsuki.gg/u/16625?mode=0&rx=1" target="_blank" rel="noopener noreferrer">Syneergy</a>
           |
           Inspired by

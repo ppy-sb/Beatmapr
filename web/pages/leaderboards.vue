@@ -21,7 +21,9 @@
           <tbody>
             <tr v-for="(entry, index) in entries" :key="entry.user.id" :class="rowClass(index)">
               <td>#{{ (page - 1) * pageSize + index + 1 }}</td>
-              <td>{{ entry.user.username }}</td>
+              <td>
+                <nuxt-link class="link" :to="`/users/${entry.user.id}`">{{ entry.user.username }}</nuxt-link>
+              </td>
               <td>{{ entry.user.country || '??' }}</td>
               <td>
                 {{ entry.cleared_beatmaps.toLocaleString() }}
