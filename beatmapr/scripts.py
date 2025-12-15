@@ -6,11 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-from sqlalchemy import select
 
-from beatmapr.app.database import SessionLocal
-from beatmapr.app.logging import log
-from beatmapr.app.models import Pack
 from beatmapr.app.updaters import (
     PACK_BATCH_SIZE,
     USERS_BATCH_SIZE,
