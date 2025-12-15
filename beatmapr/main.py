@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import subprocess
-import sys
-from pathlib import Path
-
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
@@ -12,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from beatmapr.app.config import get_settings
 from beatmapr.app.database import Base, engine
 from beatmapr.app.routers import leaderboard, meta, packs, users
+from beatmapr.app.updaters.packs import PackUpdater
 
 Base.metadata.create_all(bind=engine)
 
@@ -39,33 +36,17 @@ app.include_router(leaderboard.router)
 
 # 新增：自动更新图包的函数
 def update_packs_job():
-    print("Starting weekly packs update process...")
+    PACK_BATCH_SIZE = 10
+    print(f"Starting weekly packs update process...(batch_size={PACK_BATCH_SIZE})")
+    updater = PackUpdater()
+    
     try:
-        project_root = Path(__file__).parent.parent
-        result = subprocess.run([
-            sys.executable, "-m", "beatmapr.scripts", "packs", "update"
-        ], 
-        cwd=project_root,
-        capture_output=True,
-        text=True,
-        timeout=3600
-        )
-        
-        if result.returncode == 0:
-            print("Packs update succeeded")
-            if result.stdout:
-                print(f"Output: {result.stdout}")
-        else:
-            print(f"Packs update failed, error code: {result.returncode}")
-            if result.stderr:
-                print(f"Error: {result.stderr}")
-            if result.stdout:
-                print(f"Output: {result.stdout}")
-                
-    except subprocess.TimeoutExpired:
-        print("Packs update timeout (>1h)")
-    except Exception as e:
-        print(f"An error occurred while executing packs update task: {e}")
+        tag_idx = updater.find_largest_index()
+        updater.update_standard(batch_size=PACK_BATCH_SIZE, tag_index=tag_idx)
+        updater.update_other(batch_size=PACK_BATCH_SIZE)
+        print("Packs update completed successfully.")
+    except Exception as exc:
+        print(f"An error occurred during the packs update: {exc}")
 
 
 # 新增：初始化调度器
