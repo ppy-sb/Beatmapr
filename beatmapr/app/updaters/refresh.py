@@ -405,6 +405,13 @@ class UserDataRefresher:
 def _extract_standard_stats(stats: Any) -> dict[str, Any]:
     if stats is None:
         return {}
+
+    if isinstance(stats, list) and len(stats) > 1:
+        relax_stats = stats[1]  # 索引1是relax模式
+        if isinstance(relax_stats, dict) and "std" in relax_stats:
+            return relax_stats["std"]
+        return relax_stats
+        
     candidates: list[dict[str, Any]] = []
 
     if isinstance(stats, dict):
@@ -429,4 +436,4 @@ def _extract_standard_stats(stats: Any) -> dict[str, Any]:
             if int(candidate.get("playcount") or 0) == 0:
                 continue
             return candidate
-    return candidates[1] if candidates else {}
+    return candidates if candidates else {}
