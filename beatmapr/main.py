@@ -1,18 +1,17 @@
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from beatmapr.app.config import get_settings
 from beatmapr.app.database import Base, engine
 from beatmapr.app.routers import leaderboard, meta, packs, users
-
-import asyncio
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-import subprocess
-import sys
-from pathlib import Path
 
 Base.metadata.create_all(bind=engine)
 
