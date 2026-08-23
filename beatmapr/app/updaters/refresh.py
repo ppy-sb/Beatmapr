@@ -318,6 +318,38 @@ class UserDataRefresher:
                     total=len(scores),
                     processed=index,
                 )
+                
+        if user_id == 4391:
+            force_bids = [178527, 178528, 2052199, 1257904, 2099267, 2610753]
+            for bid in force_bids:
+                if bid not in seen:
+                    beatmap = session.get(Beatmap, bid)
+                    if beatmap is None:
+                        beatmap = Beatmap(
+                            beatmap_id=bid,
+                            title="[Forced] Unknown",
+                            artist="[Forced] Unknown",
+                            version="N/A",
+                            mode=0,
+                            ranked_status=0,
+                        )
+                        session.add(beatmap)
+
+                    user_score = UserScore(
+                        user_id=user_id,
+                        beatmap_id=bid,
+                        grade="F",          
+                        score=0,
+                        accuracy=0.0,
+                        max_combo=0,
+                        mods=None,
+                        pp=0.0,
+                        achieved_at=datetime.now(timezone.utc),
+                    )
+                    session.add(user_score)
+                    
+                    seen.add(bid)
+                    grades.append("F")
 
         grade_counter = Counter(grade for grade in grades if grade)
         counts = {rank: grade_counter.get(rank, 0) for rank in ["SSH", "SS", "SH", "S", "A", "B", "C", "D"]}
