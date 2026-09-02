@@ -137,9 +137,9 @@ def _collect_progress(db: Session, user_id: int) -> tuple[list[PackProgress], li
             Pack.pack_type,
             Pack.category,
             func.count(PackBeatmap.beatmap_id).label("total"),
-            func.count(UserScore.id).label("cleared"),
+            func.count(func.distinct(UserScore.beatmap_id)).label("cleared"),
         )
-        .join(PackBeatmap, PackBeatmap.pack_id == Pack.id)
+        .join(PackBeatmap, (PackBeatmap.pack_id == Pack.id) & PackBeatmap.effective.is_(True))
         .outerjoin(
             UserScore,
             (UserScore.beatmap_id == PackBeatmap.beatmap_id) & (UserScore.user_id == user_id),

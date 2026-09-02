@@ -428,6 +428,14 @@ def _upsert_pack_beatmaps(session: Session, pack: Pack, beatmaps: Iterable[dict[
 
     session.flush()
 
+    # Snapshot manually-managed flags so a pack refresh keeps them on the recreated rows.
+    existing_flags = {
+        beatmap_id: (effective, autocomplete)
+        for beatmap_id, effective, autocomplete in session.execute(
+            select(PackBeatmap.beatmap_id, PackBeatmap.effective, PackBeatmap.autocomplete).where(PackBeatmap.pack_id == pack.id)
+        )
+    }
+
     session.execute(delete(PackBeatmap).where(PackBeatmap.pack_id == pack.id))
 
     for position, beatmap_data in enumerate(beatmap_list, start=1):
@@ -451,7 +459,16 @@ def _upsert_pack_beatmaps(session: Session, pack: Pack, beatmaps: Iterable[dict[
         beatmap.star_rating = beatmap_data.get("star_rating")
         beatmap.ranked_status = beatmap_data.get("ranked_status")
 
-        session.add(PackBeatmap(pack_id=pack.id, beatmap_id=beatmap.beatmap_id, position=position))
+        effective, autocomplete = existing_flags.get(beatmap.beatmap_id, (True, True))
+        session.add(
+            PackBeatmap(
+                pack_id=pack.id,
+                beatmap_id=beatmap.beatmap_id,
+                position=position,
+                effective=effective,
+                autocomplete=autocomplete,
+            )
+        )
 
 
 def _normalise_json_beatmap(payload: Any) -> dict[str, Any] | None:

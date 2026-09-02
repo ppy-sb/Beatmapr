@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, func
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, func, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from beatmapr.app.database import Base
@@ -70,6 +70,12 @@ class PackBeatmap(Base):
     pack_id: Mapped[int] = mapped_column(ForeignKey("packs.id", ondelete="CASCADE"), primary_key=True)
     beatmap_id: Mapped[int] = mapped_column(ForeignKey("beatmaps.beatmap_id", ondelete="CASCADE"), primary_key=True)
     position: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # effective=False marks rows present in the official pack but excluded from progress
+    # tracking (e.g. DMCA'd or removed maps that no user can ever clear).
+    effective: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
+    # autocomplete=True marks pack beatmaps that are auto-counted as cleared for every
+    # user (unranked/loved/DMCA'd maps in official packs that can never return scores).
+    autocomplete: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
 
 
 class User(Base, TimestampMixin):

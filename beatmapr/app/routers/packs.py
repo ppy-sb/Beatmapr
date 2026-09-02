@@ -26,7 +26,7 @@ def list_pack_summary(db: Session = Depends(get_db)) -> dict[str, List[PackSumma
             Pack.released_at,
             func.count(PackBeatmap.beatmap_id).label("beatmap_count"),
         )
-        .join(PackBeatmap, PackBeatmap.pack_id == Pack.id)
+        .join(PackBeatmap, (PackBeatmap.pack_id == Pack.id) & PackBeatmap.effective.is_(True))
         .group_by(Pack.id)
         .order_by(Pack.pack_type.asc(), Pack.slug.asc())
     )
@@ -59,10 +59,13 @@ def get_pack_detail(
     if pack is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pack not found")
 
-    beatmap_ids = [
-        row.beatmap_id
-        for row in db.execute(select(PackBeatmap.beatmap_id).where(PackBeatmap.pack_id == pack_id).order_by(PackBeatmap.position.asc()))
-    ]
+    pack_rows = db.execute(
+        select(PackBeatmap.beatmap_id, PackBeatmap.autocomplete)
+        .where(PackBeatmap.pack_id == pack_id, PackBeatmap.effective.is_(True))
+        .order_by(PackBeatmap.position.asc())
+    ).all()
+    beatmap_ids = [row.beatmap_id for row in pack_rows]
+    autocomplete_ids = {row.beatmap_id for row in pack_rows if row.autocomplete}
 
     beatmaps = db.execute(select(Beatmap).where(Beatmap.beatmap_id.in_(beatmap_ids))).scalars().all()
     beatmap_map = {bm.beatmap_id: bm for bm in beatmaps}
@@ -98,7 +101,7 @@ def get_pack_detail(
                 od=beatmap.od,
                 hp=beatmap.hp,
                 ranked_status=beatmap.ranked_status,
-                cleared=beatmap_id in user_grades,
+                cleared=beatmap_id in user_grades or beatmap_id in autocomplete_ids,
                 grade=user_grades.get(beatmap_id),
             )
         )
