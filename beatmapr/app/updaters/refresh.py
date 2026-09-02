@@ -11,7 +11,12 @@ import httpx
 from fastapi import HTTPException, status
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
-from tenacity import AsyncRetrying, retry_if_exception, stop_after_attempt, wait_exponential
+from tenacity import (
+    AsyncRetrying,
+    retry_if_exception,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from beatmapr.app.config import get_settings
 from beatmapr.app.models import Beatmap, PackBeatmap, User, UserScore
@@ -318,49 +323,47 @@ class UserDataRefresher:
                     total=len(scores),
                     processed=index,
                 )
-
-        if user_id == 4391:
-            force_bids = [178527, 178528, 2052199, 1257904, 2099267, 2610753]
-            for bid in force_bids:
-                if bid not in seen:
-                    beatmap = session.get(Beatmap, bid)
-                    if beatmap is None:
-                        beatmap = Beatmap(
-                            beatmap_id=bid,
-                            title="[Forced] Unknown",
-                            artist="[Forced] Unknown",
-                            version="N/A",
-                            mode=0,
-                            ranked_status=0,
-                        )
-                        session.add(beatmap)
-
-                    user_score = UserScore(
-                        user_id=user_id,
-                        beatmap_id=bid,
-                        grade="F",          
-                        score=0,
-                        accuracy=0.0,
-                        max_combo=0,
-                        mods=None,
-                        pp=0.0,
-                        achieved_at=datetime.now(timezone.utc),
-                    )
-                    session.add(user_score)
-                    
-                    seen.add(bid)
-                    grades.append("F")
+                
+        # Pack beatmaps flagged with autocomplete (unranked / loved / DMCA'd maps from
+        # official packs) never return scores through the API, so count them as cleared
+        # for every user by materialising stub score rows.
+        autocomplete_bids = session.execute(
+            select(PackBeatmap.beatmap_id)
+            .where(PackBeatmap.effective.is_(True), PackBeatmap.autocomplete.is_(True))
+            .distinct()
+        ).scalars()
+        for bid in autocomplete_bids:
+            if bid in seen:
+                continue
+            seen.add(bid)
+            if session.get(Beatmap, bid) is None:
+                session.add(Beatmap(beatmap_id=bid))
+            session.add(
+                UserScore(
+                    user_id=user_id,
+                    beatmap_id=bid,
+                    grade="F",
+                    score=0,
+                    accuracy=0.0,
+                    max_combo=0,
+                    mods=None,
+                    pp=0.0,
+                    achieved_at=datetime.now(timezone.utc),
+                )
+            )
 
         grade_counter = Counter(grade for grade in grades if grade)
         counts = {rank: grade_counter.get(rank, 0) for rank in ["SSH", "SS", "SH", "S", "A", "B", "C", "D"]}
 
         session.commit()
 
-        total_available = session.execute(select(func.count(func.distinct(PackBeatmap.beatmap_id)))).scalar_one()
+        total_available = session.execute(
+            select(func.count(func.distinct(PackBeatmap.beatmap_id))).where(PackBeatmap.effective.is_(True))
+        ).scalar_one()
         cleared_total = session.execute(
             select(func.count(func.distinct(UserScore.beatmap_id)))
             .join(PackBeatmap, PackBeatmap.beatmap_id == UserScore.beatmap_id)
-            .where(UserScore.user_id == user_id)
+            .where(PackBeatmap.effective.is_(True), UserScore.user_id == user_id)
         ).scalar_one()
 
         user.cleared_beatmaps = int(cleared_total or 0)
