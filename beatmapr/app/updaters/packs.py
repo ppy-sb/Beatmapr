@@ -459,7 +459,9 @@ def _upsert_pack_beatmaps(session: Session, pack: Pack, beatmaps: Iterable[dict[
         beatmap.star_rating = beatmap_data.get("star_rating")
         beatmap.ranked_status = beatmap_data.get("ranked_status")
 
-        effective, autocomplete = existing_flags.get(beatmap.beatmap_id, (True, True))
+        default_autocomplete = (pack.pack_type != 'standard')  # 非标准包默认自动完成
+        effective, autocomplete = existing_flags.get(beatmap.beatmap_id, (True, default_autocomplete))
+        
         session.add(
             PackBeatmap(
                 pack_id=pack.id,
